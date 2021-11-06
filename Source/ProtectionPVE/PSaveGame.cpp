@@ -4,12 +4,10 @@
 #include "PSaveGame.h"
 
 FPlayerData::FPlayerData(const FString& Name, float Score):PlayerName(Name), PlayerScore(Score)
-{
-}
+{}
 
 FPlayerData::FPlayerData():PlayerName(TEXT("Default")), PlayerScore(0)
-{
-}
+{}
 
 int UPSaveGame::GetPlayerDatasLength() const
 {
@@ -56,5 +54,6 @@ int UPSaveGame::GetRank(const FString& Name)
 
 	return 1;
 }
+
 
 

@@ -46,6 +46,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetPlayerScoreSorted(int Index);
 
+	// 获取玩家名称对应的排名
 	UFUNCTION(BlueprintCallable)
 	int GetRank(const FString& Name);
+	
 };
