@@ -3,3 +3,7 @@
 
 #include "PGameMode.h"
 
+void APGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+}

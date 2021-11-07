@@ -13,5 +13,7 @@ UCLASS()
 class PROTECTIONPVE_API APGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+protected:
+	virtual void BeginPlay() override;
 };

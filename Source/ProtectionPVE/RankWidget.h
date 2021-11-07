@@ -23,12 +23,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateRankData(UPSaveGame* RankDataSaver,
-		UPARAM(ref) const FString& CurrentName,
-		float CurrentScore,
-		UPARAM(ref) TArray<UTextBlock*>& NameTexts,
-		UPARAM(ref) TArray<UTextBlock*>& ScoreTexts,
-		UTextBlock* MyRank,
-		UEditableText* MyName,
-		UTextBlock* MyScore);
-
+		const FString CurrentName,
+		float CurrentScore);
 };

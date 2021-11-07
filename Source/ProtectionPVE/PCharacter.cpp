@@ -178,6 +178,11 @@ void APCharacter::Fire()
 		FHitResult Hit;
 		if(GetWorld()->LineTraceSingleByChannel(Hit, CameraLocation, CameraLocation + WorldDirection, ECC_Visibility, QueryParams))
 		{
+			AActor* HitActor = Hit.GetActor();
+			// GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Blue, HitActor->GetFName().ToString());
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CurrentWeapon->DefaultImpactEffect, Hit.ImpactPoint);
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ExplosionSound, Hit.Location);
+			
 			OnHit(Hit);
 		}
 
@@ -186,16 +191,6 @@ void APCharacter::Fire()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString(TEXT("can't convert")));
 	}
-
-}
-
-void APCharacter::OnHit_Implementation(FHitResult& Hit)
-{
-	AActor* HitActor = Hit.GetActor();
-			
-	// GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Blue, HitActor->GetFName().ToString());
-
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CurrentWeapon->DefaultImpactEffect, Hit.ImpactPoint);
 
 }
 

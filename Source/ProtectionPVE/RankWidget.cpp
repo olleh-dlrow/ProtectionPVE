@@ -19,10 +19,32 @@ void URankWidget::OnCLoseButtonClicked()
 	}
 }
 
-void URankWidget::UpdateRankData(UPSaveGame* RankDataSaver, const FString& CurrentName, float CurrentScore,
-	TArray<UTextBlock*>& NameTexts, TArray<UTextBlock*>& ScoreTexts, UTextBlock* MyRank, UEditableText* MyName,
-	UTextBlock* MyScore)
+void URankWidget::UpdateRankData(UPSaveGame* RankDataSaver,const FString CurrentName, float CurrentScore)
 {
+	// 获取控件中的变量
+	UTextBlock* MyRank = Cast<UTextBlock>(GetWidgetFromName(TEXT("MyRank")));
+	UTextBlock* MyScore = Cast<UTextBlock>(GetWidgetFromName(TEXT("MyScore")));
+	UEditableText* MyName = Cast<UEditableText>(GetWidgetFromName(TEXT("MyName")));
+	check(MyRank);
+	check(MyScore);
+	check(MyName);
+
+	TArray<UTextBlock*> NameTexts;
+	NameTexts.Init(nullptr, 5);
+
+	TArray<UTextBlock*> ScoreTexts;
+	ScoreTexts.Init(nullptr, 5);
+	
+	for(int i = 0; i < 5; ++i)
+	{
+		const FString Name = "Name" + FString::FromInt(i + 1);
+		const FString Score = "Score" + FString::FromInt(i + 1);
+		NameTexts[i] = Cast<UTextBlock>(GetWidgetFromName(FName(Name)));
+		ScoreTexts[i] = Cast<UTextBlock>(GetWidgetFromName(FName(Score)));
+		check(NameTexts[i]);
+		check(ScoreTexts[i]);
+	}
+	
 	int Rank = RankDataSaver->GetRank(CurrentName);
 	
 	MyRank->SetText(FText::AsNumber(Rank));

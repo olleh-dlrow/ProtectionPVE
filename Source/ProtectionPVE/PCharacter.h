@@ -68,10 +68,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Fire();
 
-	UFUNCTION(BlueprintNativeEvent)
-	void OnHit(UPARAM(ref) FHitResult& Hit);
-	virtual void OnHit_Implementation(FHitResult& Hit);
-
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHit(UPARAM(ref) const FHitResult& Hit);
+	
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseTurnRate;
@@ -99,6 +98,10 @@ public:
 	// 当前武器
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PCharacter")
 	APWeapon* CurrentWeapon;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
+	USoundBase* ExplosionSound;
+
 private:
 	float DesiredMaxSpeed;
 

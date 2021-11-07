@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerState.h"
 #include "PPlayerState.generated.h"
 
+class UTextBlock;
+
 /**
  * 
  */
@@ -16,4 +18,11 @@ class PROTECTIONPVE_API APPlayerState : public APlayerState
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerScore(float NewScore);
+
+	void SetScoreText(UTextBlock* Text);
+protected:
+	virtual void BeginPlay() override;
+	
+	UTextBlock* ScoreText;	
 };
+

@@ -51,7 +51,6 @@ int UPSaveGame::GetRank(const FString& Name)
 			return i + 1;
 		}
 	}
-
 	return 1;
 }
 
