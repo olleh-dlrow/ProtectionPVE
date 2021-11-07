@@ -7,12 +7,13 @@
 #include "PGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
-void UInputPlayerNameWidget::OnButtonOKClicked(UEditableTextBox* PlayerNameTB)
+void UInputPlayerNameWidget::OnButtonOKClicked()
 {
 	UPGameInstance* GI = Cast<UPGameInstance>(GetGameInstance());
 	if(GI)
 	{
-		GI->PlayerName = PlayerNameTB->GetText().ToString();
+		UEditableTextBox* NameETB = Cast<UEditableTextBox>(GetWidgetFromName(TEXT("NameETB")));
+		GI->PlayerName = NameETB->GetText().ToString();
 	}
 	RemoveFromParent();
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("MainLevel"));
