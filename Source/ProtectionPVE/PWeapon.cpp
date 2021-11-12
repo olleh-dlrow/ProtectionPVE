@@ -7,14 +7,13 @@
 APWeapon::APWeapon()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	// PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
+	// MagazineMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MagazineMeshComp"));
+	
 	RootComponent = MeshComp;
-
-	MuzzleSocketName = "MuzzleSocket";
-
-	LeftHandIKSocketName = "LeftHandIKSocket";
+	// MagazineMeshComp->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, MagazineSocketName);
 }
 
 // Called when the game starts or when spawned
@@ -28,6 +27,5 @@ void APWeapon::BeginPlay()
 void APWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	
 }
+

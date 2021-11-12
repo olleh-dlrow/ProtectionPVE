@@ -30,7 +30,7 @@ void APGameStateBase::Tick(float DeltaSeconds)
 	
 	if(RemainTime > 0 && !bIsPaused)
 	{
-		RemainTime -= DeltaSeconds;
+		// RemainTime -= DeltaSeconds;
 		int CurrentIntTime = FMath::FloorToInt(RemainTime);
 		if(CurrentIntTime < LastIntTime)
 		{

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+
 #include "PPlayerController.generated.h"
 
 /**
@@ -13,10 +14,14 @@ UCLASS()
 class PROTECTIONPVE_API APPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-
+	
 protected:
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="WidgetClass")
 	TSubclassOf<UUserWidget> MainSceneWidgetClass;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="TouchInterface")
+	UTouchInterface* TouchInterface;
 };

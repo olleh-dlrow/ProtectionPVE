@@ -7,6 +7,7 @@
 #include "MainSceneWidget.generated.h"
 
 class APCharacter;
+class APWeapon;
 
 /**
  * 
@@ -16,12 +17,6 @@ class PROTECTIONPVE_API UMainSceneWidget : public UUserWidget
 {
 	GENERATED_BODY()
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
-	TSubclassOf<UUserWidget> PauseWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, Category="Ref")
-	APCharacter* Character;
-
 	UFUNCTION(BlueprintCallable)
 	void OnWidgetConstructed();
 	
@@ -30,4 +25,28 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void OnFireButtonClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void OnJumpButtonClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void OnCrouchButtonClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void OnThrowButtonClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void OnWeaponSlot1Clicked();
+
+	UFUNCTION(BlueprintCallable)
+	void OnReloadButtonClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void OnFreeViewButtonClicked();
+	
+	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
+	TSubclassOf<UUserWidget> PauseWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, Category="Ref")
+	APCharacter* Character;
 };

@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "MainSceneWidget.h"
+
 #include "PGameInstance.generated.h"
 
+class UMainSceneWidget;
 /**
  * 
  */
@@ -16,4 +19,7 @@ class PROTECTIONPVE_API UPGameInstance : public UGameInstance
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PGameInstance")
 	FString PlayerName = "Default";
+
+	UPROPERTY(EditDefaultsOnly, Category="PGameInstance")
+	FString MainLevelName = "MainLevel";
 };

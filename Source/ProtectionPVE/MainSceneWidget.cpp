@@ -6,8 +6,12 @@
 #include "PCharacter.h"
 #include "PGameInstance.h"
 #include "PGameStateBase.h"
+#include "PPlayerController.h"
 #include "Components/TextBlock.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "PWeapon.h"
+
 
 void UMainSceneWidget::OnWidgetConstructed()
 {
@@ -37,3 +41,78 @@ void UMainSceneWidget::OnFireButtonClicked()
 {
 	Character->Fire();
 }
+
+void UMainSceneWidget::OnJumpButtonClicked()
+{
+	Character->Jump();
+}
+
+void UMainSceneWidget::OnCrouchButtonClicked()
+{
+	if(!Character->GetMovementComponent()->IsCrouching())
+	{
+		Character->Crouch();
+	}
+	else
+	{
+		Character->UnCrouch();
+	}
+}
+
+void UMainSceneWidget::OnThrowButtonClicked()
+{
+	Character->Throw();
+}
+
+void UMainSceneWidget::OnWeaponSlot1Clicked()
+{
+	// 没有武器
+	if(!Character->Weapon1)return;
+
+	// 该武器为当前武器，收回
+	if(Character->Weapon1 == Character->CurrentWeapon)
+	{
+		Character->ShootWeight = 0;
+		Character->CurrentWeapon->MeshComp->SetVisibility(false);
+		Character->CurrentBulletText = nullptr;
+		Character->CurrentWeapon = nullptr;
+	}
+	// 该武器不是当前武器
+	else
+	{
+		// 没持有武器，则装备该武器
+		if(!Character->CurrentWeapon)
+		{
+			Character->CurrentWeapon = Character->Weapon1;
+			Character->CurrentBulletText = Character->CurrentBullet1Text;
+			Character->CurrentWeapon->MeshComp->SetVisibility(true);
+			Character->ShootWeight = 1;
+		}
+		// 持有武器，则换下当前武器再装备该武器
+		else
+		{
+			Character->CurrentWeapon->MeshComp->SetVisibility(false);
+			Character->CurrentWeapon = Character->Weapon1;
+			Character->CurrentBulletText = Character->CurrentBullet1Text;
+		}
+	}
+}
+
+void UMainSceneWidget::OnReloadButtonClicked()
+{
+	Character->Reload();
+}
+
+void UMainSceneWidget::OnFreeViewButtonClicked()
+{
+	 if(Character->bInFreeView)
+	 {
+		Character->ExitFreeView();
+	 }
+	else
+	{
+		Character->EnterFreeView();
+	}
+}
+
+
