@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PWeapon.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/Character.h"
 #include "PCharacter.generated.h"
@@ -174,7 +175,8 @@ public:
 	int GetCurrentMaxBulletCount() const;
 	UFUNCTION()
 	void SetCurrentMaxBulletCount(int Count);
-
+	UFUNCTION()
+	FName GetWeaponAttachSocketName(EWeapon Type);
 
 	// MainScene Widget
 	UFUNCTION()
@@ -235,6 +237,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
 	USoundBase* ExplosionSound;
+
+	UPROPERTY(VisibleAnywhere, Category="PCharacter")
+	APWeapon* DesiredPickupWeapon;
 	
 	// 人物当前状态
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")

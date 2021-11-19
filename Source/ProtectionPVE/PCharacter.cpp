@@ -279,6 +279,7 @@ void APCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		// 拾起武器
 		// 显示widget，指示拾起
 		GetMainSceneWidget()->SetPickupButtonVisibility(true);
+		DesiredPickupWeapon = Weapon;
 	}
 }
 
@@ -417,6 +418,13 @@ void APCharacter::SetNewWeapon(int Index, APWeapon* NewWeapon)
 	if(CheckWeaponIndex(Index))
 	{
 		Weapons[Index] = NewWeapon;
+		NewWeapon->SetOwner(this);
+		NewWeapon->AttachToComponent(GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			GetWeaponAttachSocketName(NewWeapon->GetType()));
+		
+		SetMaxBulletCount(Index, NewWeapon->MaxBulletCount);
+		SetRemainBulletCount(Index, NewWeapon->MaxBulletCount);
 	}
 	else
 	{
@@ -489,6 +497,20 @@ int APCharacter::GetCurrentMaxBulletCount() const
 void APCharacter::SetCurrentMaxBulletCount(int Count)
 {
 	SetMaxBulletCount(CurrentWeaponIndex, Count);
+}
+
+FName APCharacter::GetWeaponAttachSocketName(EWeapon Type)
+{
+	switch (Type)
+	{
+	case EWeapon::Rifle:
+		return RifleAttachSocketName;
+	case EWeapon::GrenadeLauncher:
+		return GrenadeLauncherSocketName;
+	default:
+		UE_LOG(LogActor, Warning, TEXT("GetWeaponAttachSocketName not found"))
+		return RifleAttachSocketName;		
+	}
 }
 
 void APCharacter::CreateWeapon(int Slot, TSubclassOf<APWeapon> WeaponClass, FName SocketName)
@@ -589,7 +611,83 @@ void APCharacter::SwitchWeapon(int Slot)
 void APCharacter::PickupWeapon()
 {
 	if(bIsFiring || bIsReloading || bIsThrowing || GetMovementComponent()->IsFalling())return;
-	
+	// 当前手上没有武器
+	if(!GetCurrentWeapon())
+	{
+		int EmptyIndex = -1;
+		for(int i = 0; i < Weapons.Num(); i++)
+		{
+			if(GetWeapon(i) == nullptr)
+			{
+				EmptyIndex = i;
+				break;
+			}
+		}
+		
+		// 武器槽没有满，放进第一个空位
+		if(EmptyIndex >= 0)
+		{
+			if(DesiredPickupWeapon)
+			{
+				SetNewWeapon(EmptyIndex, DesiredPickupWeapon);
+				SetCurrentWeaponInSlot(EmptyIndex);
+				ShootWeight = 1;
+			}
+			else
+			{
+				UE_LOG(LogActor, Warning, TEXT("PickupWeapon DesiredPickupWeapon is null"))
+			}
+		}
+		
+		// 武器槽满了，替换第一个位置的武器，
+		if(EmptyIndex == -1)
+		{
+			if(DesiredPickupWeapon)
+			{
+				// 旧武器丢到地上，并且开启覆盖事件
+				APWeapon* OldWeapon = GetWeapon(0);
+				OldWeapon->MeshComp->SetVisibility(true);
+				OldWeapon->SetOwner(nullptr);
+				OldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+				OldWeapon->SetActorLocation(DesiredPickupWeapon->GetActorLocation());
+				OldWeapon->SetActorRotation(DesiredPickupWeapon->GetActorRotation());
+				OldWeapon->MeshComp->SetGenerateOverlapEvents(true);
+
+				SetNewWeapon(0, DesiredPickupWeapon);
+				SetCurrentWeaponInSlot(0);
+				ShootWeight = 1;
+			}
+			else
+			{
+				UE_LOG(LogActor, Warning, TEXT("PickupWeapon DesiredPickupWeapon is null"))
+			}
+		}
+	}
+	// 当前手上有武器，替换
+	else
+	{
+		if(DesiredPickupWeapon)
+		{
+			// 旧武器丢到地上，并且开启覆盖事件
+			APWeapon* OldWeapon = GetCurrentWeapon();
+			OldWeapon->MeshComp->SetVisibility(true);
+			OldWeapon->SetOwner(nullptr);
+			OldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			OldWeapon->SetActorLocation(DesiredPickupWeapon->GetActorLocation());
+			OldWeapon->SetActorRotation(DesiredPickupWeapon->GetActorRotation());
+			OldWeapon->MeshComp->SetGenerateOverlapEvents(true);
+
+			// 替换成新武器
+			SetNewWeapon(CurrentWeaponIndex, DesiredPickupWeapon);
+		}
+		else
+		{
+			UE_LOG(LogActor, Warning, TEXT("PickupWeapon DesiredPickupWeapon is null"))
+		}
+	}
+
+	// 当前武器关闭覆盖事件
+	DesiredPickupWeapon->MeshComp->SetGenerateOverlapEvents(false);
 }
 
 void APCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt)

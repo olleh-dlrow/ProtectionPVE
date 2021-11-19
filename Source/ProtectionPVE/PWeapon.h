@@ -8,6 +8,13 @@
 
 class USkeletalMeshComponent;
 
+UENUM(BlueprintType)
+enum class EWeapon: uint8
+{
+	Rifle,
+	GrenadeLauncher
+};
+
 UCLASS()
 class PROTECTIONPVE_API APWeapon : public AActor
 {
@@ -20,8 +27,11 @@ public:
 	UFUNCTION()
 	void Shoot();
 
-	
+	UFUNCTION()
+	EWeapon GetType() const {return Type;}
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	bool bHasAim;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -29,6 +39,9 @@ protected:
 	virtual void NativeShoot();
 	
 	bool CheckAimHit(FHitResult& Hit) const;
+
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	EWeapon Type;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName MuzzleSocketName;

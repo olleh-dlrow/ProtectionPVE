@@ -3,6 +3,7 @@
 
 #include "PBullet.h"
 
+#include "GameFramework/Character.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
@@ -25,14 +26,14 @@ APBullet::APBullet()
 	ProjectileMovement->MaxSpeed = 3000.f;
 	ProjectileMovement->bRotationFollowsVelocity = false;
 	ProjectileMovement->bShouldBounce = true;
-
+	
 	InitialLifeSpan = 3.0f;
 }
 
-void APBullet::SetImpactEffect(UParticleSystem* Effect)
-{
-	ImpactEffect = Effect;
-}
+// void APBullet::SetImpactEffect(UParticleSystem* Effect)
+// {
+// 	ImpactEffect = Effect;
+// }
 
 // Called when the game starts or when spawned
 void APBullet::BeginPlay()
@@ -45,16 +46,17 @@ inline void APBullet::Destroyed()
 {
 	Super::Destroyed();
 
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, GetActorLocation());	
+	if(ImpactEffect)
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, GetActorLocation());
+	if(ImpactSound)
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ImpactSound, GetActorLocation());
 }
 
 void APBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	// if(ImpactEffect)
-	// 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.Location);
-	//
-	// Destroy();
+	if(OtherActor && OtherActor != UGameplayStatics::GetPlayerPawn(GetWorld(), 0) && Cast<ACharacter>(OtherActor))
+		Destroy();
 }
 
 // Called every frame
@@ -62,5 +64,9 @@ void APBullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if(ProjectileMovement->Velocity.Size() < 1.0f)
+	{
+		Destroy();
+	}
 }
 

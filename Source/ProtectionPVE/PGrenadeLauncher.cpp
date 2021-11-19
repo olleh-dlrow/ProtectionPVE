@@ -23,6 +23,6 @@ void APGrenadeLauncher::NativeShoot()
 	if(BulletClass)
 	{
 		APBullet* Bullet = GetWorld()->SpawnActor<APBullet>(BulletClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-		Bullet->SetImpactEffect(DefaultImpactEffect);
+		// Bullet->SetImpactEffect(DefaultImpactEffect);
 	}
 }

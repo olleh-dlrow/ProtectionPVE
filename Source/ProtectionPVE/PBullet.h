@@ -15,7 +15,7 @@ public:
 	// Sets default values for this actor's properties
 	APBullet();
 
-	void SetImpactEffect(class UParticleSystem* Effect);
+	// void SetImpactEffect(class UParticleSystem* Effect);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -35,7 +35,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UProjectileMovementComponent* ProjectileMovement;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category="Bullet")
 	class UParticleSystem* ImpactEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category="Bullet")
+	USoundBase* ImpactSound;
 };
 
