@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "PCharacter.generated.h"
 
+class UMainSceneWidget;
 class UCameraComponent;
 class USpringArmComponent;
 class APWeapon;
@@ -41,6 +42,12 @@ protected:
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupt);
 	
 	bool CheckAimHit(FHitResult& Hit);
+
+	bool CheckWeaponIndex(int Index) const;
+
+	TArray<APWeapon*> Weapons = {nullptr, nullptr};
+
+	int CurrentWeaponIndex = -1;
 	
 	FVector LastTouchLocation;
 
@@ -53,6 +60,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	// class USceneComponent* PickupSceneComp;
+	//
+	// UPROPERTY(EditDefaultsOnly, Category="Components")
+	// class UWidgetComponent* PickupComp;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Actor")
 	ACameraActor* FreeViewCamera;
 
@@ -61,12 +74,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Actor")
 	FRotator FVCameraRotator;
-	
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	// UChildActorComponent* ChildActorComp;
-
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	// UChildActorComponent* BackCameraChildActorComp;
 	
 	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
 	FName ThrowAttachSocketName = "ThrowSocket";
@@ -85,6 +92,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
 	UAnimMontage* ReloadMontage;
+
+	UPROPERTY()
+	UMainSceneWidget* MainSceneWidget;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -106,10 +116,22 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Reload();
+
+	UFUNCTION(BlueprintCallable)
+	void SwitchWeapon(int Slot);
+
+	UFUNCTION()
+	void PickupWeapon();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnHit(UPARAM(ref) const FHitResult& Hit);
 
+	UFUNCTION()
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
 	UFUNCTION(BlueprintCallable)
 	void NotifyThrowOut();
 
@@ -119,11 +141,46 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ExitFreeView();
 
-	UFUNCTION()
-	void SetCurrentBulletCount(int Count);
-
+	// Weapon
 	UFUNCTION()
 	void CreateWeapon(int Slot, TSubclassOf<APWeapon> WeaponClass, FName SocketName);
+	
+	UFUNCTION()
+	int GetRemainBulletCount(int Index) const;
+	UFUNCTION()
+	int GetMaxBulletCount(int Index) const;
+	UFUNCTION()
+	APWeapon* GetWeapon(int Index) const;
+
+	UFUNCTION()
+	void SetNewWeapon(int Index, APWeapon* NewWeapon);
+	UFUNCTION()
+	void SetRemainBulletCount(int Index, int Count);
+	UFUNCTION()
+	void SetMaxBulletCount(int Index, int Count);
+
+	// Current Weapon
+	UFUNCTION(BlueprintCallable)
+	APWeapon* GetCurrentWeapon() const;
+	UFUNCTION()
+	void SetCurrentWeaponInSlot(int Slot);
+	UFUNCTION()
+	void PutBackCurrentWeapon();
+	UFUNCTION()
+	int GetCurrentRemainBulletCount() const;
+	UFUNCTION()
+	void SetCurrentRemainBulletCount(int Count);
+	UFUNCTION()
+	int GetCurrentMaxBulletCount() const;
+	UFUNCTION()
+	void SetCurrentMaxBulletCount(int Count);
+
+
+	// MainScene Widget
+	UFUNCTION()
+	UMainSceneWidget* GetMainSceneWidget() const;
+	UFUNCTION()
+	void SetMainSceneWidget(UMainSceneWidget* Widget);
 	
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
@@ -166,33 +223,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "PCharacter")
 	TSubclassOf<APWeapon> RifleWeaponClass;
 
+	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
+	TSubclassOf<APWeapon> GrenadeLauncherClass;
+	
 	// weapon 
 	UPROPERTY(EditDefaultsOnly, Category = "PCharacter")
 	FName RifleAttachSocketName = "RifleSocket";
-	
-	// 当前武器
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PCharacter")
-	APWeapon* CurrentWeapon;
+
+	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
+	FName GrenadeLauncherSocketName = "GrenadeLauncherSocket";
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
 	USoundBase* ExplosionSound;
-
-	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
-	APWeapon* Weapon1;
-
-	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
-	APWeapon* Weapon2;
-	
-	UTextBlock* CurrentBullet1Text;
-
-	UTextBlock* CurrentBullet2Text;
-
-	UTextBlock* MaxBullet1Text;
-
-	UTextBlock* MaxBullet2Text;
-
-	// 当前手上拿着的武器
-	UTextBlock* CurrentBulletText;
 	
 	// 人物当前状态
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
@@ -207,10 +249,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
 	bool bIsReloading;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="State")
 	float HandIKWeight;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="State")
 	float ShootWeight;
 private:
 	void SprintTick();

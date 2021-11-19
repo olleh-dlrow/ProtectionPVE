@@ -6,16 +6,34 @@
 #include "PCharacter.h"
 #include "PGameInstance.h"
 #include "PGameStateBase.h"
-#include "PPlayerController.h"
+#include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "PWeapon.h"
 
-
-void UMainSceneWidget::OnWidgetConstructed()
+void UMainSceneWidget::NativeOnInitialized()
 {
+	Super::NativeOnInitialized();
+	// 设置武器栏控件
+	RemainBulletTexts[0] = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentBullet1")));
+	RemainBulletTexts[1] = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentBullet2")));
+	MaxBulletTexts[0] = Cast<UTextBlock>(GetWidgetFromName(TEXT("MaxBullet1")));
+	MaxBulletTexts[1] = Cast<UTextBlock>(GetWidgetFromName(TEXT("MaxBullet2")));
+
+	PickupBtn = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Pickup")));
+	PickupBtn->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UMainSceneWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	// 初始化外部引用
 	Character = Cast<APCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	// Character引用MainSceneWidget
+	Character->SetMainSceneWidget(this);
+	
+	// 获取GameInstance
 	UPGameInstance* GI = Cast<UPGameInstance>(GetGameInstance());
 	check(GI);
 	
@@ -66,36 +84,12 @@ void UMainSceneWidget::OnThrowButtonClicked()
 
 void UMainSceneWidget::OnWeaponSlot1Clicked()
 {
-	// 没有武器
-	if(!Character->Weapon1)return;
+	Character->SwitchWeapon(0);
+}
 
-	// 该武器为当前武器，收回
-	if(Character->Weapon1 == Character->CurrentWeapon)
-	{
-		Character->ShootWeight = 0;
-		Character->CurrentWeapon->MeshComp->SetVisibility(false);
-		Character->CurrentBulletText = nullptr;
-		Character->CurrentWeapon = nullptr;
-	}
-	// 该武器不是当前武器
-	else
-	{
-		// 没持有武器，则装备该武器
-		if(!Character->CurrentWeapon)
-		{
-			Character->CurrentWeapon = Character->Weapon1;
-			Character->CurrentBulletText = Character->CurrentBullet1Text;
-			Character->CurrentWeapon->MeshComp->SetVisibility(true);
-			Character->ShootWeight = 1;
-		}
-		// 持有武器，则换下当前武器再装备该武器
-		else
-		{
-			Character->CurrentWeapon->MeshComp->SetVisibility(false);
-			Character->CurrentWeapon = Character->Weapon1;
-			Character->CurrentBulletText = Character->CurrentBullet1Text;
-		}
-	}
+void UMainSceneWidget::OnWeaponSlot2Clicked()
+{
+	Character->SwitchWeapon(1);
 }
 
 void UMainSceneWidget::OnReloadButtonClicked()
@@ -112,6 +106,47 @@ void UMainSceneWidget::OnFreeViewButtonClicked()
 	else
 	{
 		Character->EnterFreeView();
+	}
+}
+
+void UMainSceneWidget::OnPickupButtonClicked()
+{
+	Character->PickupWeapon();
+}
+
+void UMainSceneWidget::SetRemainBulletText(int Index, const FString& Text)
+{
+	if(Index >= 0 && Index < RemainBulletTexts.Num())
+	{
+		RemainBulletTexts[Index]->SetText(FText::FromString(Text));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetRemainBulletText index out of range"))
+	}
+}
+
+void UMainSceneWidget::SetMaxBulletText(int Index, const FString& Text)
+{
+	if(Index >= 0 && Index < MaxBulletTexts.Num())
+	{
+		MaxBulletTexts[Index]->SetText(FText::FromString((Text)));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetMaxBulletText index out of range"))
+	}
+}
+
+void UMainSceneWidget::SetPickupButtonVisibility(float Visible)
+{
+	if(Visible)
+	{
+		PickupBtn->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		PickupBtn->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 

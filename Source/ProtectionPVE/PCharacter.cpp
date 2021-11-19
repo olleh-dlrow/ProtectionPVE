@@ -11,6 +11,8 @@
 #include "PGrenade.h"
 #include "PPlayerController.h"
 #include "Camera/CameraActor.h"
+#include "MainSceneWidget.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 APCharacter::APCharacter()
@@ -30,13 +32,21 @@ APCharacter::APCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
-	// ChildActorComp = CreateDefaultSubobject<UChildActorComponent>(TEXT("ChildActorComp"));
-	// ChildActorComp->SetupAttachment(RootComponent);
-	// ChildActorComp->SetChildActorClass(ACameraActor::StaticClass());
+	// 
+	// PickupSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("PickupSceneComp"));
+	// PickupSceneComp->SetupAttachment(RootComponent);
+	//
+	// PickupComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupComp"));
+	// PickupComp->SetupAttachment(PickupSceneComp);
+	// PickupComp->SetVisibility(false);
 	
 	// 设置最大行走速度
 	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 	DesiredMaxSpeed = MaxWalkSpeed;
+
+	// 注册事件
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APCharacter::OnBeginOverlap);
+	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APCharacter::OnEndOverlap);
 }
 
 // Called when the game starts or when spawned
@@ -104,7 +114,7 @@ void APCharacter::Tick(float DeltaTime)
 	}
 
 	// 设置IKWeight
-	if(CurrentWeapon && CurrentWeapon->MeshComp->IsVisible() && !bIsReloading && !bIsThrowing)
+	if(GetCurrentWeapon() && GetCurrentWeapon()->MeshComp->IsVisible() && !bIsReloading && !bIsThrowing)
 	{
 		HandIKWeight = 1;
 	}
@@ -172,9 +182,9 @@ void APCharacter::ChangeSprintToWalk()
 
 void APCharacter::Fire()
 {
-	if(!CurrentWeapon)return;
+	if(!GetCurrentWeapon())return;
 
-	if(CurrentWeapon->CurrentBulletCount <= 0)
+	if(GetCurrentRemainBulletCount() <= 0)
 	{
 		// 播放空弹音效
 		
@@ -184,27 +194,19 @@ void APCharacter::Fire()
 	UAnimInstance* AI = GetMesh()->GetAnimInstance();
 	if(bIsReloading || bIsThrowing || AI->Montage_IsPlaying(FireMontage))return;
 
+	// 可以开火
 	bIsFiring = true;
 	// 子弹减少
-	SetCurrentBulletCount(CurrentWeapon->CurrentBulletCount - 1);
+	SetCurrentRemainBulletCount(GetCurrentRemainBulletCount() - 1);
 	
 	// 播放Montage 动画
 	if(FireMontage && !GetMesh()->GetAnimInstance()->Montage_IsPlaying(FireMontage))
 	{
-		// GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("Fire"));
 		PlayAnimMontage(FireMontage);
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ExplosionSound, CurrentWeapon->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ExplosionSound, GetCurrentWeapon()->GetActorLocation());
 	}
 
-	FHitResult Hit;
-	if(CheckAimHit(Hit))
-	{
-		AActor* HitActor = Hit.GetActor();
-		// GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Blue, HitActor->GetFName().ToString());
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CurrentWeapon->DefaultImpactEffect, Hit.ImpactPoint);
-			
-		OnHit(Hit);
-	}
+	GetCurrentWeapon()->Shoot();
 }
 
 bool APCharacter::CheckAimHit(FHitResult& Hit)
@@ -235,6 +237,11 @@ bool APCharacter::CheckAimHit(FHitResult& Hit)
 	return false;
 }
 
+bool APCharacter::CheckWeaponIndex(int Index) const
+{
+	return Index >= 0 && Index < Weapons.Num();
+}
+
 void APCharacter::Throw()
 {
 	UAnimInstance* AI = GetMesh()->GetAnimInstance();
@@ -256,12 +263,35 @@ void APCharacter::Throw()
 	if(!AI->Montage_IsPlaying(ThrowMontage))
 	{
 		PlayAnimMontage(ThrowMontage);
-		if(CurrentWeapon)
+		if(GetCurrentWeapon())
 		{
-			CurrentWeapon->MeshComp->SetVisibility(false);
+			GetCurrentWeapon()->MeshComp->SetVisibility(false);
 		}
 	}
 }
+
+void APCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	APWeapon* Weapon = Cast<APWeapon>(OtherActor);
+	if(Weapon)
+	{
+		// 拾起武器
+		// 显示widget，指示拾起
+		GetMainSceneWidget()->SetPickupButtonVisibility(true);
+	}
+}
+
+void APCharacter::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	APWeapon* Weapon = Cast<APWeapon>(OtherActor);
+	if(Weapon)
+	{
+		GetMainSceneWidget()->SetPickupButtonVisibility(false);
+	}
+}
+
 
 void APCharacter::NotifyThrowOut()
 {
@@ -337,27 +367,139 @@ void APCharacter::ExitFreeView()
 	}
 }
 
-void APCharacter::SetCurrentBulletCount(int Count)
+int APCharacter::GetRemainBulletCount(int Index) const
 {
-	CurrentWeapon->CurrentBulletCount = Count;
-	CurrentBulletText->SetText(FText::AsNumber(Count));
+	APWeapon* Weapon = GetWeapon(Index);
+	if(Weapon)
+	{
+		return Weapon->RemainBulletCount;
+	}
+	else
+	{
+		UE_LOG(LogActor, Warning, TEXT("Weapon is null"))
+	}
+	return 0;
+}
+
+int APCharacter::GetMaxBulletCount(int Index) const
+{
+	APWeapon* Weapon = GetWeapon(Index);
+	if(Weapon)return Weapon->MaxBulletCount;
+	else
+	{
+		UE_LOG(LogActor, Warning, TEXT("Weapon is null"))
+	}
+	return 0;
+}
+
+APWeapon* APCharacter::GetWeapon(int Index) const
+{
+	if(CheckWeaponIndex(Index))
+	{
+		return Weapons[Index];
+	}
+	else
+	{
+		UE_LOG(LogActor, Warning, TEXT("GetWeapon index out of range"))
+	}
+	return nullptr;
+}
+
+APWeapon* APCharacter::GetCurrentWeapon() const
+{
+	if(CurrentWeaponIndex == -1)
+		return nullptr;
+	return GetWeapon(CurrentWeaponIndex);
+}
+
+void APCharacter::SetNewWeapon(int Index, APWeapon* NewWeapon)
+{
+	if(CheckWeaponIndex(Index))
+	{
+		Weapons[Index] = NewWeapon;
+	}
+	else
+	{
+		UE_LOG(LogActor, Warning, TEXT("SetWeapon index out of range"))
+	}
+}
+
+void APCharacter::SetRemainBulletCount(int Index, int Count)
+{
+	APWeapon* Weapon = GetWeapon(Index);
+	if(!Weapon)
+	{
+		UE_LOG(LogActor, Warning, TEXT("SetRemainBulletCount index out of range"))
+	}
+	else
+	{
+		Weapon->RemainBulletCount = Count;
+		if(MainSceneWidget)
+		{
+			MainSceneWidget->SetRemainBulletText(Index, FString::FromInt(Count));
+		}
+	}
+}
+
+void APCharacter::SetMaxBulletCount(int Index, int Count)
+{
+	APWeapon* Weapon = GetWeapon(Index);
+	if(!Weapon)
+	{
+		UE_LOG(LogActor, Warning, TEXT("SetMaxBulletCount index out of range"))
+	}
+	else
+	{
+		Weapon->MaxBulletCount = Count;
+		if(MainSceneWidget)
+		{
+			MainSceneWidget->SetMaxBulletText(Index, "/" + FString::FromInt(Count));
+		}
+	}
+}
+
+void APCharacter::SetCurrentWeaponInSlot(int Slot)
+{
+	if(Slot >= 0 && Slot < Weapons.Num())
+		CurrentWeaponIndex = Slot;
+	else
+		UE_LOG(LogActor, Warning, TEXT("SetCurrentWeapon index out of range"))
+}
+
+void APCharacter::PutBackCurrentWeapon()
+{
+	CurrentWeaponIndex = -1;
+}
+
+int APCharacter::GetCurrentRemainBulletCount() const
+{
+	return GetRemainBulletCount(CurrentWeaponIndex);
+}
+
+void APCharacter::SetCurrentRemainBulletCount(int Count)
+{
+	SetRemainBulletCount(CurrentWeaponIndex, Count);
+}
+
+int APCharacter::GetCurrentMaxBulletCount() const
+{
+	return GetMaxBulletCount(CurrentWeaponIndex);
+}
+
+void APCharacter::SetCurrentMaxBulletCount(int Count)
+{
+	SetMaxBulletCount(CurrentWeaponIndex, Count);
 }
 
 void APCharacter::CreateWeapon(int Slot, TSubclassOf<APWeapon> WeaponClass, FName SocketName)
 {
-	APWeapon** WeaponPtr = nullptr;
-	if(Slot == 1)
+	if(!CheckWeaponIndex(Slot))
 	{
-		WeaponPtr = &Weapon1;
-	}
-	else if(Slot == 2)
-	{
-		WeaponPtr = &Weapon2;
-	}
-	else
-	{
+		UE_LOG(LogActor, Warning, TEXT("CreateWeapon index out of range"))
 		return;
 	}
+	APWeapon** WeaponPtr = &Weapons[Slot];
+
 	// attach rifle
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -371,13 +513,24 @@ void APCharacter::CreateWeapon(int Slot, TSubclassOf<APWeapon> WeaponClass, FNam
 		Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
 		Weapon->MeshComp->SetVisibility(false);
 
-		Weapon->CurrentBulletCount = Weapon->MaxBulletCount;
+		// 初始化弹药数量
+		Weapon->RemainBulletCount = Weapon->MaxBulletCount;
 	}
+}
+
+UMainSceneWidget* APCharacter::GetMainSceneWidget() const
+{
+	return MainSceneWidget;
+}
+
+void APCharacter::SetMainSceneWidget(UMainSceneWidget* Widget)
+{
+	MainSceneWidget = Widget;
 }
 
 void APCharacter::Reload()
 {
-	if(!CurrentWeapon)return;
+	if(!GetCurrentWeapon())return;
 	UAnimInstance* AI = GetMesh()->GetAnimInstance();
 	bool bIsInAir = GetMovementComponent()->IsFalling();
 	check(ReloadMontage);
@@ -391,14 +544,62 @@ void APCharacter::Reload()
 	}
 }
 
+void APCharacter::SwitchWeapon(int Slot)
+{
+	if(bIsFiring || bIsReloading || bIsThrowing || GetMovementComponent()->IsFalling())return;
+	// 没有武器
+	if(!GetWeapon(Slot))
+	{
+		UE_LOG(LogTemp, Display, TEXT("No Weapon"))
+		return;
+	}
+
+	// 可以切换武器
+	// 该武器为当前武器，收回
+	if(GetWeapon(Slot) == GetCurrentWeapon())
+	{
+		UE_LOG(LogTemp, Display, TEXT("Current Weapon"))
+		ShootWeight = 0;
+		GetCurrentWeapon()->MeshComp->SetVisibility(false);
+		PutBackCurrentWeapon();
+	}
+	// 该武器不是当前武器
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Not Current Weapon"))
+		// 没持有武器，则装备该武器
+		if(!GetCurrentWeapon())
+		{
+			UE_LOG(LogTemp, Display, TEXT("Not Equip This Weapon"))
+			SetCurrentWeaponInSlot(Slot);
+			GetCurrentWeapon()->MeshComp->SetVisibility(true);
+			ShootWeight = 1;
+		}
+		// 持有武器，则换下当前武器再装备该武器
+		else
+		{
+			UE_LOG(LogTemp, Display, TEXT("Equipped Other Weapon"))
+			GetCurrentWeapon()->MeshComp->SetVisibility(false);
+			SetCurrentWeaponInSlot(Slot);
+			GetCurrentWeapon()->MeshComp->SetVisibility(true);
+		}
+	}
+}
+
+void APCharacter::PickupWeapon()
+{
+	if(bIsFiring || bIsReloading || bIsThrowing || GetMovementComponent()->IsFalling())return;
+	
+}
+
 void APCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt)
 {
 	if(Montage == ThrowMontage)
 	{
 		bIsThrowing = false;
-		if(CurrentWeapon)
+		if(GetCurrentWeapon())
 		{
-			CurrentWeapon->MeshComp->SetVisibility(true);
+			GetCurrentWeapon()->MeshComp->SetVisibility(true);
 		}
 	}
 	else if(Montage == FireMontage)
@@ -408,7 +609,7 @@ void APCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt)
 	else if(Montage == ReloadMontage)
 	{
 		bIsReloading = false;
-		SetCurrentBulletCount(CurrentWeapon->MaxBulletCount);
+		SetCurrentRemainBulletCount(GetCurrentMaxBulletCount());
 	}
 }
 

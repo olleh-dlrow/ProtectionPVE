@@ -17,22 +17,34 @@ public:
 	// Sets default values for this actor's properties
 	APWeapon();
 
+	UFUNCTION()
+	void Shoot();
+
+	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void NativeShoot();
+	
+	bool CheckAimHit(FHitResult& Hit) const;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName MuzzleSocketName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName LeftHandIKSocketName;
-	
+
+	// Reference
+	UPROPERTY()
+	APlayerController* PC;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	UParticleSystem* DefaultImpactEffect;
+	class UParticleSystem* DefaultImpactEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* MeshComp;
@@ -44,7 +56,7 @@ public:
 	FName MagazineSocketName;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
-	int CurrentBulletCount;
+	int RemainBulletCount;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	int MaxBulletCount;

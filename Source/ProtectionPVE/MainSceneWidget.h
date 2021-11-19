@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
 #include "MainSceneWidget.generated.h"
 
 class APCharacter;
@@ -16,9 +17,17 @@ UCLASS()
 class PROTECTIONPVE_API UMainSceneWidget : public UUserWidget
 {
 	GENERATED_BODY()
+public:
+	// 控件接口
+	void SetRemainBulletText(int Index, const FString& Text);
+
+	void SetMaxBulletText(int Index, const FString& Text);
+
+	void SetPickupButtonVisibility(float Visible);
 protected:
-	UFUNCTION(BlueprintCallable)
-	void OnWidgetConstructed();
+	virtual void NativeOnInitialized() override;
+
+	virtual void NativeConstruct() override;
 	
 	UFUNCTION(BlueprintCallable)
 	void OnPauseButtonClicked();
@@ -39,14 +48,30 @@ protected:
 	void OnWeaponSlot1Clicked();
 
 	UFUNCTION(BlueprintCallable)
+	void OnWeaponSlot2Clicked();
+
+	UFUNCTION(BlueprintCallable)
 	void OnReloadButtonClicked();
 
 	UFUNCTION(BlueprintCallable)
 	void OnFreeViewButtonClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void OnPickupButtonClicked();
 	
 	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
 	TSubclassOf<UUserWidget> PauseWidgetClass;
 	
 	UPROPERTY(VisibleAnywhere, Category="Ref")
 	APCharacter* Character;
+
+	// 各种控件引用
+	UPROPERTY()
+	TArray<UTextBlock*> RemainBulletTexts = {nullptr, nullptr};
+
+	UPROPERTY()
+	TArray<UTextBlock*> MaxBulletTexts = {nullptr, nullptr};
+
+	UPROPERTY()
+	class UButton* PickupBtn;
 };
