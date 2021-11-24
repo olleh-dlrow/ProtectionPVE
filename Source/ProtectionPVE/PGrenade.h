@@ -24,6 +24,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="PGrenade")
+	float Damage = 40.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="PGrenade")
+	float DamageRadius = 300.f;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PGrenade")
 	UStaticMeshComponent* MeshComp;

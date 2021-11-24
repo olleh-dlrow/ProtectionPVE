@@ -3,17 +3,51 @@
 
 #include "PRifle.h"
 
-#include "Kismet/GameplayStatics.h"
 
-void APRifle::NativeShoot()
+#include "PCore.h"
+#include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
+
+void APRifle::NativeShoot(FAimHitInfo Info)
 {
-	Super::NativeShoot();
+	Super::NativeShoot(Info);
 	
 	// 命中检测
-	FHitResult Hit;
-	if(CheckAimHit(Hit))
+	if(Info.bHitHappened)
 	{
-		AActor* HitActor = Hit.GetActor();
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefaultImpactEffect, Hit.ImpactPoint);
+		// 服务器端判定伤害
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+		QueryParams.bTraceComplex = true;
+		QueryParams.bReturnPhysicalMaterial = true;
+
+		FHitResult Hit;
+		if(GetWorld()->LineTraceSingleByChannel(Hit, Info.TraceFrom, Info.TraceTo, ECC_Pawn, QueryParams))
+		{
+			// PCore::PrintOnScreen(GetWorld(), Hit.GetActor()->GetName() + FString(" Take Damage"), 2.f);
+			UGameplayStatics::ApplyPointDamage(Hit.GetActor(),
+				GetDamage(),
+				Info.TraceTo - Info.TraceFrom,
+				Hit,
+				GetOwner()->GetInstigatorController(),
+				GetOwner(),
+				DamageTypeClass);
+			
+			if(DefaultImpactEffect)
+				SpawnEffect(Info.HitLocation);
+		}
 	}
+	
+	// FHitResult Hit;
+	// if(CheckAimHit(Hit))
+	// {
+	// 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefaultImpactEffect, Hit.ImpactPoint);
+	// }		
+}
+
+void APRifle::SpawnEffect_Implementation(FVector ImpactPoint)
+{
+	if(GetLocalRole() < ROLE_Authority)
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefaultImpactEffect, ImpactPoint);
 }

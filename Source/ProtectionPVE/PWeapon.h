@@ -3,10 +3,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "PWeapon.generated.h"
 
 class USkeletalMeshComponent;
+
+USTRUCT(BlueprintType)
+struct PROTECTIONPVE_API FAimHitInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FVector TraceFrom;
+
+	UPROPERTY()
+	FVector TraceTo;
+	
+	UPROPERTY()
+	FVector HitLocation;
+
+	UPROPERTY()
+	bool bHitHappened;
+
+	UPROPERTY()
+	FVector SpawnLocation;
+
+	UPROPERTY()
+	FRotator SpawnRotation;
+};
 
 UENUM(BlueprintType)
 enum class EWeapon: uint8
@@ -24,34 +47,44 @@ public:
 	// Sets default values for this actor's properties
 	APWeapon();
 
+	// 只在服务端执行
 	UFUNCTION()
-	void Shoot();
-
+	void Shoot(FAimHitInfo Info);
+	
 	UFUNCTION()
 	EWeapon GetType() const {return Type;}
 
+	UFUNCTION()
+	float GetDamage() const {return Damage;}
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	bool bHasAim;
+
+	UPROPERTY(Replicated, EditAnywhere, Category="Weapon")
+	bool bCanSee;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	FName LeftHandIKSocketName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	FName MuzzleSocketName;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	virtual void NativeShoot();
+	// 只在服务端执行
+	virtual void NativeShoot(FAimHitInfo Info);
 	
 	bool CheckAimHit(FHitResult& Hit) const;
 
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	EWeapon Type;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	FName MuzzleSocketName;
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	float Damage = 10.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	FName LeftHandIKSocketName;
-
-	// Reference
-	UPROPERTY()
-	APlayerController* PC;
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	TSubclassOf<UDamageType> DamageTypeClass;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -61,17 +94,17 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* MeshComp;
-
+	
 	// UPROPERTY(EditDefaultsOnly, Category="Components")
 	// USkeletalMeshComponent* MagazineMeshComp;
 
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	FName MagazineSocketName;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
 	int RemainBulletCount;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	int MaxBulletCount;
 };
 

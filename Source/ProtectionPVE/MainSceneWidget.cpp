@@ -8,7 +8,6 @@
 #include "PGameStateBase.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 void UMainSceneWidget::NativeOnInitialized()
@@ -29,9 +28,9 @@ void UMainSceneWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	// 初始化外部引用
-	Character = Cast<APCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	// Character = Cast<APCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	// Character引用MainSceneWidget
-	Character->SetMainSceneWidget(this);
+	// Character->SetMainSceneWidget(this);
 	
 	// 获取GameInstance
 	UPGameInstance* GI = Cast<UPGameInstance>(GetGameInstance());
@@ -57,7 +56,7 @@ void UMainSceneWidget::OnPauseButtonClicked()
 
 void UMainSceneWidget::OnFireButtonClicked()
 {
-	Character->Fire();
+	// Character->Fire();
 }
 
 void UMainSceneWidget::OnJumpButtonClicked()
@@ -67,14 +66,7 @@ void UMainSceneWidget::OnJumpButtonClicked()
 
 void UMainSceneWidget::OnCrouchButtonClicked()
 {
-	if(!Character->GetMovementComponent()->IsCrouching())
-	{
-		Character->Crouch();
-	}
-	else
-	{
-		Character->UnCrouch();
-	}
+	Character->UpdateCrouchState();
 }
 
 void UMainSceneWidget::OnThrowButtonClicked()

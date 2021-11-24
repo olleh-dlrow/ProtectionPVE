@@ -6,6 +6,7 @@
 #include "PWeapon.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
 #include "PCharacter.generated.h"
 
 class UMainSceneWidget;
@@ -13,6 +14,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class APWeapon;
 class APGrenade;
+
 
 UCLASS()
 class PROTECTIONPVE_API APCharacter : public ACharacter
@@ -31,6 +33,10 @@ protected:
 
 	void MoveRight(float Value);
 
+	void TurnBody(float Value);
+	
+	void LookUp(float Value);
+	
 	void TurnAtRate(float Rate);
 
 	void LookUpAtRate(float Rate);
@@ -44,10 +50,18 @@ protected:
 	
 	bool CheckAimHit(FHitResult& Hit);
 
+	// 计算发射轨迹线的射线
+	void CalculateTraceEnds(FVector& TraceFrom, FVector& TraceTo);
+	
 	bool CheckWeaponIndex(int Index) const;
 
+	UPROPERTY()
+	FAimHitInfo AimHitInfo;
+	
+	UPROPERTY(Replicated)
 	TArray<APWeapon*> Weapons = {nullptr, nullptr};
 
+	UPROPERTY(Replicated)
 	int CurrentWeaponIndex = -1;
 	
 	FVector LastTouchLocation;
@@ -61,11 +75,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	// class USceneComponent* PickupSceneComp;
-	//
-	// UPROPERTY(EditDefaultsOnly, Category="Components")
-	// class UWidgetComponent* PickupComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	class UPHealthComponent* HealthComp;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Actor")
 	ACameraActor* FreeViewCamera;
@@ -109,20 +120,53 @@ public:
 	UFUNCTION()
 	void ChangeSprintToWalk();
 
-	UFUNCTION(BlueprintCallable)
-	void Fire();
+	UFUNCTION()
+	void StartFire();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Fire(FAimHitInfo Info);
+	
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
+	void Fire(FAimHitInfo Info);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
+	void StartThrow();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Throw(FAimHitInfo Info);
+	
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
 	void Throw();
 
 	UFUNCTION(BlueprintCallable)
+	void UpdateCrouchState();
+
+	UFUNCTION(Server, Reliable)
+	void Server_Reload();
+	
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
 	void Reload();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Server, Reliable)
+	void Server_SwitchWeapon(int Slot);
+	
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
 	void SwitchWeapon(int Slot);
 
 	UFUNCTION()
+	void SwitchWeapon0() {Server_SwitchWeapon(0);}
+
+	UFUNCTION()
+	void SwitchWeapon1() {Server_SwitchWeapon(1);}
+
+	UFUNCTION(Server, Reliable)
+	void Server_PickupWeapon();
+	
+	UFUNCTION(NetMulticast, Reliable)
 	void PickupWeapon();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void OnDied();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnHit(UPARAM(ref) const FHitResult& Hit);
@@ -142,13 +186,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ExitFreeView();
 
+	UFUNCTION(BlueprintCallable)
+	float GetRemoteViewPitch() const
+	{
+		float Pitch = RemoteViewPitch * 360.f / 255.f;
+		if(Pitch >= 0.f && Pitch < 180.f)return FMath::Clamp(Pitch, 0.f, 90.0f);
+		return FMath::Clamp(Pitch - 360.f, -90.f, 0.f);
+	}
+	
 	// Weapon
 	UFUNCTION()
 	void CreateWeapon(int Slot, TSubclassOf<APWeapon> WeaponClass, FName SocketName);
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	int GetRemainBulletCount(int Index) const;
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	int GetMaxBulletCount(int Index) const;
 	UFUNCTION()
 	APWeapon* GetWeapon(int Index) const;
@@ -220,7 +272,7 @@ public:
 	bool bCanSprint = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PCharacter")
-	bool bOpenMouseTurn = false;
+	bool bPlayInPC = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "PCharacter")
 	TSubclassOf<APWeapon> RifleWeaponClass;
@@ -238,26 +290,35 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
 	USoundBase* ExplosionSound;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
+	USoundBase* PickupSound;
+	
 	UPROPERTY(VisibleAnywhere, Category="PCharacter")
 	APWeapon* DesiredPickupWeapon;
 	
 	// 人物当前状态
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
 	bool bInFreeView;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
+	bool bCanPickup;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
+	bool bDied;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="State")
 	bool bIsFiring;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="State")
 	bool bIsThrowing;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="State")
 	bool bIsReloading;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="State")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
 	float HandIKWeight;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="State")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
 	float ShootWeight;
 private:
 	void SprintTick();

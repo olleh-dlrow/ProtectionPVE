@@ -20,9 +20,19 @@ public:
 	void SetPlayerScore(float NewScore);
 
 	void SetScoreText(UTextBlock* Text);
+
+	UFUNCTION()
+	void CreateWeapon(int Slot, TSubclassOf<class APWeapon> WeaponClass, FName SocketName);
+
+	UFUNCTION()
+	TSubclassOf<APWeapon> GetWeaponClass(const FString& WeaponName);
+
+	UFUNCTION()
+	FName GetWeaponAttachSocketName(const FString& WeaponName);
 protected:
 	virtual void BeginPlay() override;
-	
-	UTextBlock* ScoreText;	
+
+	UPROPERTY()
+	UTextBlock* ScoreText;
 };
 

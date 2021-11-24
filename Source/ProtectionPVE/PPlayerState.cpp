@@ -3,6 +3,7 @@
 
 #include "PPlayerState.h"
 
+#include "PCharacter.h"
 #include "Components/TextBlock.h"
 
 void APPlayerState::SetPlayerScore(float NewScore)
@@ -18,6 +19,49 @@ void APPlayerState::SetPlayerScore(float NewScore)
 void APPlayerState::SetScoreText(UTextBlock* Text)
 {
 	ScoreText = Text;
+}
+
+void APPlayerState::CreateWeapon(int Slot, TSubclassOf<APWeapon> WeaponClass, FName SocketName)
+{
+	APCharacter* MyCharacter = GetPawn<APCharacter>();
+	if(MyCharacter)
+	{
+		MyCharacter->CreateWeapon(Slot, WeaponClass, SocketName);
+	}
+}
+
+TSubclassOf<APWeapon> APPlayerState::GetWeaponClass(const FString& WeaponName)
+{
+	APCharacter* MyCharacter = GetPawn<APCharacter>();
+	if(MyCharacter)
+	{
+		if(WeaponName == "Rifle")
+		{
+			return MyCharacter->RifleWeaponClass;
+		}
+		else if(WeaponName == "GrenadeLauncher")
+		{
+			return MyCharacter->GrenadeLauncherClass;
+		}
+	}
+	return nullptr;
+}
+
+FName APPlayerState::GetWeaponAttachSocketName(const FString& WeaponName)
+{
+	APCharacter* MyCharacter = GetPawn<APCharacter>();
+	if(MyCharacter)
+	{
+		if(WeaponName == "Rifle")
+		{
+			return MyCharacter->RifleAttachSocketName;
+		}
+		else if(WeaponName == "GrenadeLauncher")
+		{
+			return MyCharacter->GrenadeLauncherSocketName;
+		}
+	}
+	return "";
 }
 
 void APPlayerState::BeginPlay()

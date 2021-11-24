@@ -16,7 +16,7 @@ class PROTECTIONPVE_API APGrenadeLauncher : public APWeapon
 	GENERATED_BODY()
 
 protected:
-	virtual void NativeShoot() override;
+	virtual void NativeShoot(FAimHitInfo Info) override;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	TSubclassOf<APBullet> BulletClass;

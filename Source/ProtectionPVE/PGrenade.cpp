@@ -3,6 +3,8 @@
 
 #include "PGrenade.h"
 
+#include "PCore.h"
+
 // Sets default values
 APGrenade::APGrenade()
 {
@@ -14,6 +16,9 @@ APGrenade::APGrenade()
 	
 	RootComponent = CapsuleComp;
 	MeshComp->SetupAttachment(CapsuleComp);
+
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
@@ -27,6 +32,7 @@ void APGrenade::BeginPlay()
 void APGrenade::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 
 }
 

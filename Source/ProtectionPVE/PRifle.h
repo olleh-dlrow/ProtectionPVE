@@ -14,5 +14,8 @@ class PROTECTIONPVE_API APRifle : public APWeapon
 {
 	GENERATED_BODY()
 protected:
-	virtual void NativeShoot() override;
+	virtual void NativeShoot(FAimHitInfo Info) override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void SpawnEffect(FVector ImpactPoint);
 };

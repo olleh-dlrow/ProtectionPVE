@@ -15,7 +15,8 @@ public:
 	// Sets default values for this actor's properties
 	APBullet();
 
-	// void SetImpactEffect(class UParticleSystem* Effect);
+	UFUNCTION()
+	void SetDamage(float Value) {Damage = Value;}
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,9 +26,20 @@ protected:
 
 	virtual void Destroyed() override;
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	UFUNCTION(BlueprintCallable)
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void SpawnEffect();
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Bullet")
+	float Damage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Bullet")
+	float DamageRadius = 100.f;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Bullet")
 	UStaticMeshComponent* MeshComp;
@@ -41,4 +53,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Bullet")
 	USoundBase* ImpactSound;
 };
+
+
 
