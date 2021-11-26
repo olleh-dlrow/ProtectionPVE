@@ -105,8 +105,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
 	UAnimMontage* ReloadMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
+	UAnimMontage* DeathMontage;
+	
 	UPROPERTY()
 	UMainSceneWidget* MainSceneWidget;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="PCharacter")
+	int ReviveTime;
+
+	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
+	int DefaultReviveTime = 5;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -235,6 +244,21 @@ public:
 	UMainSceneWidget* GetMainSceneWidget() const;
 	UFUNCTION()
 	void SetMainSceneWidget(UMainSceneWidget* Widget);
+
+	UFUNCTION(BlueprintCallable)
+	int GetReviveTime() const {return ReviveTime;}
+
+	UFUNCTION(BlueprintCallable)
+	int GetDefaultReviveTime() const {return DefaultReviveTime;}
+
+	UFUNCTION(BlueprintCallable)
+	void SetReviveTime(int Value) {ReviveTime = Value;}
+	
+	UFUNCTION()
+	void ReviveCountDown();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void OnRevive();
 	
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
@@ -295,6 +319,9 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Category="PCharacter")
 	APWeapon* DesiredPickupWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="PCharacter")
+	FTimerHandle ReviveTimerHandle;
 	
 	// 人物当前状态
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")

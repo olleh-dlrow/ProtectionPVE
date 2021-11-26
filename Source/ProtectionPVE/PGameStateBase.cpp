@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "RankWidget.h"
+#include "Net/UnrealNetwork.h"
 #include "Components/TextBlock.h"
 
 APGameStateBase::APGameStateBase()
@@ -28,35 +29,35 @@ void APGameStateBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
-	if(RemainTime > 0 && !bIsPaused)
-	{
-		// RemainTime -= DeltaSeconds;
-		int CurrentIntTime = FMath::FloorToInt(RemainTime);
-		if(CurrentIntTime < LastIntTime)
-		{
-			LastIntTime = CurrentIntTime;
-			if(TimeText)
-			{
-				FString Time = "00:";
-				if(LastIntTime / 10 == 0)
-				{
-					Time += "0" + FString::FromInt(LastIntTime);
-				}
-				else
-				{
-					Time += FString::FromInt(LastIntTime);
-				}
-				TimeText->SetText(FText::FromString(Time));
-			}
-		}
-	}
-	else if(RemainTime <= 0 && !bIsEndGame)
-	{
-		TimeText->SetText(FText::AsNumber(0));
-		
-		OnGameEnd();
-		bIsEndGame = true;
-	}
+	// if(RemainTime > 0 && !bIsPaused)
+	// {
+	// 	// RemainTime -= DeltaSeconds;
+	// 	int CurrentIntTime = FMath::FloorToInt(RemainTime);
+	// 	if(CurrentIntTime < LastIntTime)
+	// 	{
+	// 		LastIntTime = CurrentIntTime;
+	// 		if(TimeText)
+	// 		{
+	// 			FString Time = "00:";
+	// 			if(LastIntTime / 10 == 0)
+	// 			{
+	// 				Time += "0" + FString::FromInt(LastIntTime);
+	// 			}
+	// 			else
+	// 			{
+	// 				Time += FString::FromInt(LastIntTime);
+	// 			}
+	// 			TimeText->SetText(FText::FromString(Time));
+	// 		}
+	// 	}
+	// }
+	// else if(RemainTime <= 0 && !bIsEndGame)
+	// {
+	// 	TimeText->SetText(FText::AsNumber(0));
+	// 	
+	// 	OnGameEnd();
+	// 	bIsEndGame = true;
+	// }
 }
 
 void APGameStateBase::OnGameEnd()
@@ -97,4 +98,11 @@ void APGameStateBase::OnGameEnd()
 void APGameStateBase::SetTimeText(UTextBlock* Text)
 {
 	TimeText = Text;
+}
+
+void APGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	// Here we list the variables we want to replicate + a condition if wanted
+	DOREPLIFETIME(APGameStateBase, RemainTime);
 }

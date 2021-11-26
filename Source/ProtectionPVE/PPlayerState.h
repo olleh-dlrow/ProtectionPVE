@@ -15,7 +15,29 @@ UCLASS()
 class PROTECTIONPVE_API APPlayerState : public APlayerState
 {
 	GENERATED_BODY()
+protected:
+	UPROPERTY(Replicated, VisibleAnywhere, Category="PPlayerState")
+	int KillCount;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="PPlayerState")
+	int DeathCount;
 public:
+
+	
+	// getter / setter
+	
+	UFUNCTION(BlueprintCallable)
+	int GetKillCount() const {return KillCount;}
+
+	UFUNCTION(BlueprintCallable)
+	int GetDeathCount() const {return DeathCount;}
+
+	UFUNCTION(BlueprintCallable)
+	void SetKillCount(int Value) {KillCount = Value; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetDeathCount(int Value) {DeathCount = Value;}
+	
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerScore(float NewScore);
 

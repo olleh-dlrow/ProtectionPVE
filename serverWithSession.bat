@@ -1,1 +1,1 @@
- "E:\program_files\UE4Source\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe" "%CD%\ProtectionPVE.uproject" MainLogin -server -log -nosteam
+ "E:\program_files\UE4Source\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe" "%CD%\ProtectionPVE.uproject" ServerWithSession -server -log -nosteam

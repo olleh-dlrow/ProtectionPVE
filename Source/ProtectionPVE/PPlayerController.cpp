@@ -32,21 +32,21 @@ void APPlayerController::BeginPlay()
 		// 添加Character对Widget的引用
 		MyCharacter->SetMainSceneWidget(MainScene);
 		
-		// 添加GameState对Time的引用
-		APGameStateBase* GameState = Cast<APGameStateBase>(UGameplayStatics::GetGameState(GetWorld()));
-		if(GameState)
-		{
-			UTextBlock* TimeText = Cast<UTextBlock>(MainScene->GetWidgetFromName(TEXT("TimeText")));
-			GameState->SetTimeText(TimeText);
-			GameState->InitTimeText();
-		}
+		// // 添加GameState对Time的引用
+		// APGameStateBase* GameState = Cast<APGameStateBase>(UGameplayStatics::GetGameState(GetWorld()));
+		// if(GameState)
+		// {
+		// 	UTextBlock* TimeText = Cast<UTextBlock>(MainScene->GetWidgetFromName(TEXT("TimeText")));
+		// 	GameState->SetTimeText(TimeText);
+		// 	GameState->InitTimeText();
+		// }
 	
 		// 添加PlayerState对Score的引用
-		if(PS)
-		{
-			UTextBlock* ScoreText = Cast<UTextBlock>(MainScene->GetWidgetFromName(TEXT("ScoreText")));
-			PS->SetScoreText(ScoreText);
-		}
+		// if(PS)
+		// {
+		// 	UTextBlock* ScoreText = Cast<UTextBlock>(MainScene->GetWidgetFromName(TEXT("ScoreText")));
+		// 	PS->SetScoreText(ScoreText);
+		// }
 		
 		MainScene->AddToViewport();
 		

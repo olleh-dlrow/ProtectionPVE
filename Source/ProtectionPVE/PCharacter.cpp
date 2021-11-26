@@ -383,6 +383,12 @@ void APCharacter::Server_Reload_Implementation()
 void APCharacter::OnDied_Implementation()
 {
 	bUseControllerRotationYaw = false;
+
+	// auto AI = GetMesh()->GetAnimInstance();
+	//
+	// if(GetLocalRole() < ROLE_Authority && AI && DeathMontage)
+	// 	AI->Montage_Play(DeathMontage);
+	
 }
 
 void APCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -693,6 +699,23 @@ void APCharacter::SetMainSceneWidget(UMainSceneWidget* Widget)
 		MainSceneWidget = Widget;
 }
 
+void APCharacter::ReviveCountDown()
+{
+	ReviveTime--;
+	if(ReviveTime <= 0)
+	{
+		bDied = false;
+		GetWorld()->GetTimerManager().ClearTimer(ReviveTimerHandle);
+		HealthComp->SetHealth(HealthComp->GetDefaultHealth());
+		OnRevive();
+	}
+}
+
+void APCharacter::OnRevive_Implementation()
+{
+	bUseControllerRotationYaw = true;
+}
+
 void APCharacter::Reload_Implementation()
 {
 	// PCore::PrintOnScreen(this, "Reload", 2.f);
@@ -772,7 +795,7 @@ void APCharacter::PickupWeapon_Implementation()
 	if(bDied || !bCanPickup || bIsFiring || bIsReloading || bIsThrowing || GetMovementComponent()->IsFalling())return;
 	if(GetLocalRole() < ROLE_Authority && IsLocallyControlled())
 	{
-		PCore::PrintOnScreen(GetWorld(), "Pickup", 2.f);
+		// PCore::PrintOnScreen(GetWorld(), "Pickup", 2.f);
 		if(PickupSound)
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickupSound, GetActorLocation(), GetActorRotation());
 	}
@@ -889,6 +912,7 @@ void APCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(APCharacter, CurrentWeaponIndex);
 	DOREPLIFETIME(APCharacter, bDied);
 	DOREPLIFETIME(APCharacter, bCanPickup);
+	DOREPLIFETIME(APCharacter, ReviveTime);
 }
 
 

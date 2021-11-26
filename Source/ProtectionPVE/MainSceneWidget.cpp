@@ -37,8 +37,8 @@ void UMainSceneWidget::NativeConstruct()
 	check(GI);
 	
 	// 设置玩家名称
-	UTextBlock* NameText = Cast<UTextBlock>(GetWidgetFromName(TEXT("NameText")));
-	NameText->SetText(FText::FromString(GI->PlayerName));
+	//UTextBlock* NameText = Cast<UTextBlock>(GetWidgetFromName(TEXT("NameText")));
+	//NameText->SetText(FText::FromString(GI->PlayerName));
 }
 
 void UMainSceneWidget::OnPauseButtonClicked()

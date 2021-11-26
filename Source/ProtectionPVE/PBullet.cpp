@@ -64,7 +64,7 @@ void APBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiv
 	// PCore::PrintOnScreen(GetWorld(), "On Hit", 2.f);
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		PCore::PrintOnScreen(GetWorld(), FString("On Hit ") + OtherActor->GetName(), 2.f);
+		// PCore::PrintOnScreen(GetWorld(), FString("On Hit ") + OtherActor->GetName(), 2.f);
 		SpawnEffect();
 		Destroy();
 	}
@@ -79,7 +79,7 @@ void APBullet::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		PCore::PrintOnScreen(GetWorld(),  FString("On Overlap ") + OtherActor->GetName(), 2.f);
+		// PCore::PrintOnScreen(GetWorld(),  FString("On Overlap ") + OtherActor->GetName(), 2.f);
 		SpawnEffect();
 		Destroy();
 	}

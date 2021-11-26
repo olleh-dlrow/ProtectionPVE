@@ -23,7 +23,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PGameState")
 	float MaxTime = 30.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="PGameState")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="PGameState")
 	float RemainTime = 0.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="PGameState")

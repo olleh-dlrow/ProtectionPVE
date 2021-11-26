@@ -30,6 +30,9 @@ public:
 	float GetHealth() const {return Health;}
 
 	UFUNCTION()
+	void SetHealth(float Value) {Health = Value;}
+	
+	UFUNCTION()
 	float GetDefaultHealth() const {return DefaultHealth;}
 
 protected:

@@ -5,6 +5,7 @@
 
 #include "PCharacter.h"
 #include "PCore.h"
+#include "PPlayerState.h"
 
 // Sets default values for this component's properties
 UPHealthComponent::UPHealthComponent()
@@ -42,15 +43,37 @@ void UPHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, 
 	Health = FMath::Clamp(Health - Damage, 0.f, DefaultHealth);
 	
 	const FString Out = FString("Current Health: ") + FString::SanitizeFloat(Health);
-	PCore::PrintOnScreen(GetWorld(), Out, 2.f);
-	if(Health <= 0.f)
+	// PCore::PrintOnScreen(GetWorld(), Out, 2.f);
+
+	APCharacter* MyCharacter = Cast<APCharacter>(GetOwner());
+	if(MyCharacter)
 	{
-		APCharacter* MyCharacter = Cast<APCharacter>(GetOwner());
-		if(MyCharacter)
+		if(Health <= 0.f && !MyCharacter->bDied)
 		{
 			MyCharacter->bDied = true;
+			// 结算死亡数和击杀数
+			APCharacter* Causer = Cast<APCharacter>(DamageCauser);
+			if(Causer)
+			{
+				// PCore::PrintOnScreen(GetWorld(), "is causer", 2.f);
+				APPlayerState* CauserPS = Causer->GetPlayerState<APPlayerState>();
+				if(CauserPS)
+				{
+					CauserPS->SetKillCount(CauserPS->GetKillCount() + 1);
+				}
+			}
+			APPlayerState* MyPS = MyCharacter->GetPlayerState<APPlayerState>();
+			if(MyPS)
+			{
+				MyPS->SetDeathCount(MyPS->GetDeathCount() + 1);
+			}
+
+			// 开启复活倒计时
+			MyCharacter->SetReviveTime(MyCharacter->GetDefaultReviveTime());
+			GetWorld()->GetTimerManager().SetTimer(MyCharacter->ReviveTimerHandle, MyCharacter, &APCharacter::ReviveCountDown, 1.f, true);
+			
 			MyCharacter->OnDied();
-		}
+		}		
 	}
 }
 

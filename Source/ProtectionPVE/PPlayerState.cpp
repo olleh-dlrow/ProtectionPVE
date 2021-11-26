@@ -68,3 +68,10 @@ void APPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
+void APPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	// Here we list the variables we want to replicate + a condition if wanted
+	DOREPLIFETIME(APPlayerState, KillCount);
+	DOREPLIFETIME(APPlayerState, DeathCount);
+}
