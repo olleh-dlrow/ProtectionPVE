@@ -6,7 +6,7 @@
 
 游戏演示及apk：
 
- 提取码：2048
+https://pan.baidu.com/s/1G1yUP7aV872S96sle8it3g 提取码：2048
 
 ## 启动方法
 
