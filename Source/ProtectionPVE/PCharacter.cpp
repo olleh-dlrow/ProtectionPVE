@@ -55,6 +55,17 @@ void APCharacter::BeginPlay()
 	AI->OnMontageEnded.AddDynamic(this, &APCharacter::OnMontageEnded);
 }
 
+void APCharacter::OnDestroy()
+{
+	for(int i = 0; i < Weapons.Num();++i)
+	{
+		if(Weapons[i])
+		{
+			Weapons[i]->Destroy(true);
+		}
+	}
+}
+
 void APCharacter::MoveForward(float Value)
 {
 	if(!bDied)
