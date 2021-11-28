@@ -126,10 +126,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION()
+	UFUNCTION(Server, Reliable)
 	void ChangeWalkToSprint();
 
-	UFUNCTION()
+	UFUNCTION(Server, Reliable)
 	void ChangeSprintToWalk();
 
 	UFUNCTION()
@@ -351,8 +351,10 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
 	float ShootWeight;
 private:
+	UFUNCTION()
 	void SprintTick();
-	
+
+	UPROPERTY(Replicated)
 	float DesiredMaxSpeed;
 };
 

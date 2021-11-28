@@ -154,7 +154,7 @@ void APCharacter::SprintTick()
 {
 	float Speed = GetCharacterMovement()->MaxWalkSpeed;
 
-	int Dir = FMath::Sign(DesiredMaxSpeed - Speed);
+	const int Dir = FMath::Sign(DesiredMaxSpeed - Speed);
 	if (Dir == 1)
 	{
 		Speed = FMath::Min(Speed + Acceleration, DesiredMaxSpeed);
@@ -204,12 +204,12 @@ void APCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &APCharacter::Server_Reload);
 }
 
-void APCharacter::ChangeWalkToSprint()
+void APCharacter::ChangeWalkToSprint_Implementation()
 {
 	DesiredMaxSpeed = MaxSprintSpeed;
 }
 
-void APCharacter::ChangeSprintToWalk()
+void APCharacter::ChangeSprintToWalk_Implementation()
 {
 	DesiredMaxSpeed = MaxWalkSpeed;
 }
@@ -924,6 +924,7 @@ void APCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(APCharacter, bDied);
 	DOREPLIFETIME(APCharacter, bCanPickup);
 	DOREPLIFETIME(APCharacter, ReviveTime);
+	DOREPLIFETIME(APCharacter, DesiredMaxSpeed);
 }
 
 
