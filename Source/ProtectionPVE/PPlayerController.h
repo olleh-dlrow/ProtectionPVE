@@ -24,7 +24,8 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="TouchInterface")
 	UTouchInterface* TouchInterface;
-	
+
+	virtual void OnPossess(APawn* InPawn) override;
 protected:
 	// 客户端的Simulate不会执行
 	virtual void BeginPlay() override;

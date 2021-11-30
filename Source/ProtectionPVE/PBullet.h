@@ -35,8 +35,8 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void SpawnEffect();
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Bullet")
-	float Damage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Bullet")
+	float Damage = 15.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Bullet")
 	float DamageRadius = 100.f;

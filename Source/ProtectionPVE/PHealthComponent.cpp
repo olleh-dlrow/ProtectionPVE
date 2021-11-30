@@ -43,25 +43,26 @@ void UPHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, 
 	Health = FMath::Clamp(Health - Damage, 0.f, DefaultHealth);
 	
 	const FString Out = FString("Current Health: ") + FString::SanitizeFloat(Health);
-	// PCore::PrintOnScreen(GetWorld(), Out, 2.f);
+	PCore::PrintOnScreen(GetWorld(), Out, 2.f);
 
 	APCharacter* MyCharacter = Cast<APCharacter>(GetOwner());
 	if(MyCharacter)
 	{
+		
 		if(Health <= 0.f && !MyCharacter->bDied)
 		{
 			MyCharacter->bDied = true;
 			// 结算死亡数和击杀数
 			APCharacter* Causer = Cast<APCharacter>(DamageCauser);
-			if(Causer)
-			{
-				// PCore::PrintOnScreen(GetWorld(), "is causer", 2.f);
-				APPlayerState* CauserPS = Causer->GetPlayerState<APPlayerState>();
-				if(CauserPS)
-				{
-					CauserPS->SetKillCount(CauserPS->GetKillCount() + 1);
-				}
-			}
+			// if(Causer)
+			// {
+			// 	// PCore::PrintOnScreen(GetWorld(), "is causer", 2.f);
+			// 	APPlayerState* CauserPS = Causer->GetPlayerState<APPlayerState>();
+			// 	if(CauserPS)
+			// 	{
+			// 		CauserPS->SetKillCount(CauserPS->GetKillCount() + 1);
+			// 	}
+			// }
 			APPlayerState* MyPS = MyCharacter->GetPlayerState<APPlayerState>();
 			if(MyPS)
 			{

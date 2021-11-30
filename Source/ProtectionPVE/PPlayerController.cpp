@@ -12,6 +12,26 @@
 #include "Kismet/GameplayStatics.h"
 #include "PCore.h"
 
+void APPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	APCharacter* MyCharacter = Cast<APCharacter>(InPawn);
+	if(MyCharacter)
+	{
+		// 开局默认创建1把武器
+		MyCharacter->CreateWeapon(0, MyCharacter->RifleWeaponClass, MyCharacter->RifleAttachSocketName);
+		MyCharacter->SetMaxBulletCount(0, MyCharacter->GetMaxBulletCount(0));
+		MyCharacter->SetRemainBulletCount(0, MyCharacter->GetMaxBulletCount(0));
+	
+		// 第2把武器
+		MyCharacter->CreateWeapon(1, MyCharacter->GrenadeLauncherClass, MyCharacter->GrenadeLauncherSocketName);
+		MyCharacter->SetMaxBulletCount(1, MyCharacter->GetMaxBulletCount(1));
+		MyCharacter->SetRemainBulletCount(1, MyCharacter->GetMaxBulletCount(1));		
+	}
+
+}
+
 void APPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -93,15 +113,15 @@ void APPlayerController::Tick(float DeltaSeconds)
 		APCharacter* MyCharacter = GetPawn<APCharacter>();
 		if(MyCharacter)
 		{
-			// 开局默认创建1把武器
-			MyCharacter->CreateWeapon(0, MyCharacter->RifleWeaponClass, MyCharacter->RifleAttachSocketName);
-			MyCharacter->SetMaxBulletCount(0, MyCharacter->GetMaxBulletCount(0));
-			MyCharacter->SetRemainBulletCount(0, MyCharacter->GetMaxBulletCount(0));
-
-			// 第2把武器
-			MyCharacter->CreateWeapon(1, MyCharacter->GrenadeLauncherClass, MyCharacter->GrenadeLauncherSocketName);
-			MyCharacter->SetMaxBulletCount(1, MyCharacter->GetMaxBulletCount(1));
-			MyCharacter->SetRemainBulletCount(1, MyCharacter->GetMaxBulletCount(1));
+			// // 开局默认创建1把武器
+			// MyCharacter->CreateWeapon(0, MyCharacter->RifleWeaponClass, MyCharacter->RifleAttachSocketName);
+			// MyCharacter->SetMaxBulletCount(0, MyCharacter->GetMaxBulletCount(0));
+			// MyCharacter->SetRemainBulletCount(0, MyCharacter->GetMaxBulletCount(0));
+			//
+			// // 第2把武器
+			// MyCharacter->CreateWeapon(1, MyCharacter->GrenadeLauncherClass, MyCharacter->GrenadeLauncherSocketName);
+			// MyCharacter->SetMaxBulletCount(1, MyCharacter->GetMaxBulletCount(1));
+			// MyCharacter->SetRemainBulletCount(1, MyCharacter->GetMaxBulletCount(1));
 		}
 	}
 }

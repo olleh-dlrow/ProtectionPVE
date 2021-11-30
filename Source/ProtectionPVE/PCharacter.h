@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PHealthComponent.h"
 #include "PWeapon.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "PHealthComponent.h"
 #include "PCharacter.generated.h"
 
 class UMainSceneWidget;
@@ -78,7 +80,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	class UPHealthComponent* HealthComp;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Actor")
@@ -110,6 +112,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
 	UAnimMontage* DeathMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
+	UAnimMontage* HitMontage;
 	
 	UPROPERTY()
 	UMainSceneWidget* MainSceneWidget;
@@ -205,6 +210,12 @@ public:
 		if(Pitch >= 0.f && Pitch < 180.f)return FMath::Clamp(Pitch, 0.f, 90.0f);
 		return FMath::Clamp(Pitch - 360.f, -90.f, 0.f);
 	}
+
+	UFUNCTION()
+	UAnimMontage* GetHitMontage() const {return HitMontage;}
+
+	UFUNCTION(BlueprintCallable)
+	float GetHealthPercent() const {return HealthComp->GetHealth() / HealthComp->GetDefaultHealth();}
 	
 	// Weapon
 	UFUNCTION()
@@ -319,8 +330,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
 	USoundBase* PickupSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
+	USoundBase* ReloadSound;
 	
-	UPROPERTY(VisibleAnywhere, Category="PCharacter")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="PCharacter")
 	APWeapon* DesiredPickupWeapon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="PCharacter")

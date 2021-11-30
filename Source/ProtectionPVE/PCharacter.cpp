@@ -15,7 +15,6 @@
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "PCore.h"
-#include "PHealthComponent.h"
 
 // Sets default values
 APCharacter::APCharacter()
@@ -408,11 +407,14 @@ void APCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	APWeapon* Weapon = Cast<APWeapon>(OtherActor);
 	if(Weapon)
 	{
+		if(Weapon->GetOwner() == this)return;
 		// 拾起武器
 		// 显示widget，指示拾起
 		if(GetMainSceneWidget())
 			GetMainSceneWidget()->SetPickupButtonVisibility(true);
+
 		DesiredPickupWeapon = Weapon;
+		// PCore::PrintOnScreen(GetWorld(), DesiredPickupWeapon->GetName(), 2.f);
 
 		bCanPickup = true;
 	}
@@ -424,6 +426,7 @@ void APCharacter::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	APWeapon* Weapon = Cast<APWeapon>(OtherActor);
 	if(Weapon)
 	{
+		if(Weapon->GetOwner() == this)return;
 		if(GetMainSceneWidget())
 			GetMainSceneWidget()->SetPickupButtonVisibility(false);
 
@@ -692,6 +695,7 @@ void APCharacter::CreateWeapon(int Slot, TSubclassOf<APWeapon> WeaponClass, FNam
 
 		// 初始化弹药数量
 		Weapon->RemainBulletCount = Weapon->MaxBulletCount;
+		Weapon->MeshComp->SetGenerateOverlapEvents(false);
 	}
 	else
 	{
@@ -732,6 +736,7 @@ void APCharacter::Reload_Implementation()
 	// PCore::PrintOnScreen(this, "Reload", 2.f);
 	bool bIsInAir = GetMovementComponent()->IsFalling();
 	if(bDied || !GetCurrentWeapon() || bIsFiring || bIsInAir)return;
+	if(GetCurrentMaxBulletCount() <= 0)return;
 	
 	UAnimInstance* AI = GetMesh()->GetAnimInstance();
 	if(AI)
@@ -739,7 +744,9 @@ void APCharacter::Reload_Implementation()
 		if(AI->Montage_IsPlaying(ReloadMontage))return;
 
 		bIsReloading = true;
-
+		if(ReloadSound)
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ReloadSound, GetActorLocation(), GetActorRotation());
+		
 		if(!AI->Montage_IsPlaying(ReloadMontage))
 		{
 			PlayAnimMontage(ReloadMontage);
@@ -810,6 +817,8 @@ void APCharacter::PickupWeapon_Implementation()
 		if(PickupSound)
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickupSound, GetActorLocation(), GetActorRotation());
 	}
+
+	// if(GetLocalRole() < ROLE_Authority)return;
 	
 	// 当前手上没有武器
 	if(!GetCurrentWeapon())
@@ -887,7 +896,8 @@ void APCharacter::PickupWeapon_Implementation()
 	}
 
 	// 当前武器关闭覆盖事件
-	DesiredPickupWeapon->MeshComp->SetGenerateOverlapEvents(false);
+	if(DesiredPickupWeapon)
+		DesiredPickupWeapon->MeshComp->SetGenerateOverlapEvents(false);
 }
 
 void APCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt)
@@ -907,7 +917,8 @@ void APCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt)
 	else if(Montage == ReloadMontage)
 	{
 		bIsReloading = false;
-		SetCurrentRemainBulletCount(GetCurrentMaxBulletCount());
+		SetCurrentRemainBulletCount(GetCurrentRemainBulletCount() + GetCurrentMaxBulletCount());
+		SetCurrentMaxBulletCount(0);
 	}
 }
 
@@ -925,6 +936,7 @@ void APCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(APCharacter, bCanPickup);
 	DOREPLIFETIME(APCharacter, ReviveTime);
 	DOREPLIFETIME(APCharacter, DesiredMaxSpeed);
+	DOREPLIFETIME(APCharacter, DesiredPickupWeapon);
 }
 
 

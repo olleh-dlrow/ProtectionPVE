@@ -25,25 +25,23 @@ void APRifle::NativeShoot(FAimHitInfo Info)
 		FHitResult Hit;
 		if(GetWorld()->LineTraceSingleByChannel(Hit, Info.TraceFrom, Info.TraceTo, ECC_Pawn, QueryParams))
 		{
+			if(Hit.Actor->ActorHasTag("Enemy"))
+			{
+				UGameplayStatics::ApplyPointDamage(Hit.GetActor(),
+					GetDamage(),
+					Info.TraceTo - Info.TraceFrom,
+					Hit,
+					GetOwner()->GetInstigatorController(),
+					GetOwner(),
+					DamageTypeClass);
+			}
 			// PCore::PrintOnScreen(GetWorld(), Hit.GetActor()->GetName() + FString(" Take Damage"), 2.f);
-			UGameplayStatics::ApplyPointDamage(Hit.GetActor(),
-				GetDamage(),
-				Info.TraceTo - Info.TraceFrom,
-				Hit,
-				GetOwner()->GetInstigatorController(),
-				GetOwner(),
-				DamageTypeClass);
+
 			
 			if(DefaultImpactEffect)
 				SpawnEffect(Info.HitLocation);
 		}
 	}
-	
-	// FHitResult Hit;
-	// if(CheckAimHit(Hit))
-	// {
-	// 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefaultImpactEffect, Hit.ImpactPoint);
-	// }		
 }
 
 void APRifle::SpawnEffect_Implementation(FVector ImpactPoint)

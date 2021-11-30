@@ -48,12 +48,14 @@ inline void APBullet::Destroyed()
 	// 服务端判定伤害
 	if(GetLocalRole() == ROLE_Authority)
 	{
+		TArray<AActor*> Actors;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Friend", Actors);
 		UGameplayStatics::ApplyRadialDamage(GetWorld(),
 			Damage,
 			GetActorLocation(),
 			DamageRadius,
 			nullptr,
-			TArray<AActor*>{GetOwner()},
+			Actors,
 			GetOwner());
 	}
 }
@@ -83,8 +85,6 @@ void APBullet::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		SpawnEffect();
 		Destroy();
 	}
-	//if(OtherActor && OtherActor != UGameplayStatics::GetPlayerPawn(GetWorld(), 0) && Cast<ACharacter>(OtherActor))
-		//Destroy();
 }
 
 void APBullet::SpawnEffect_Implementation()
