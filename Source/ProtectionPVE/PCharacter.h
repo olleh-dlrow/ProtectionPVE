@@ -3,12 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PHealthComponent.h"
 #include "PWeapon.h"
-#include "Components/TextBlock.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
-#include "PHealthComponent.h"
+
 #include "PCharacter.generated.h"
 
 class UMainSceneWidget;
@@ -213,9 +211,6 @@ public:
 
 	UFUNCTION()
 	UAnimMontage* GetHitMontage() const {return HitMontage;}
-
-	UFUNCTION(BlueprintCallable)
-	float GetHealthPercent() const {return HealthComp->GetHealth() / HealthComp->GetDefaultHealth();}
 	
 	// Weapon
 	UFUNCTION()

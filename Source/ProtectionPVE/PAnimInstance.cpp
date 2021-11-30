@@ -4,6 +4,7 @@
 #include "PAnimInstance.h"
 
 #include "PCharacter.h"
+#include "PCore.h"
 #include "GameFramework/PawnMovementComponent.h"
 
 void UPAnimInstance::NativeBeginPlay()

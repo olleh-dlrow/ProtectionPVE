@@ -89,12 +89,10 @@ void APBullet::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 
 void APBullet::SpawnEffect_Implementation()
 {
-	if(GetLocalRole() < ROLE_Authority)
-	{
+	
 		// PCore::PrintOnScreen(GetWorld(), "Effect Spawned", 3.f);
 		if(ImpactEffect)UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, GetActorLocation());
 		if(ImpactSound) UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ImpactSound, GetActorLocation());
-	}
 }
 
 // Called every frame

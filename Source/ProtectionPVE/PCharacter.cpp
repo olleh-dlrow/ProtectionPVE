@@ -14,6 +14,7 @@
 #include "MainSceneWidget.h"
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "PHealthComponent.h"
 #include "PCore.h"
 
 // Sets default values
@@ -31,6 +32,7 @@ APCharacter::APCharacter()
 	SpringArmComp->bUsePawnControlRotation = true;
 	SpringArmComp->SetupAttachment(RootComponent);
 
+	
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 	
@@ -710,7 +712,7 @@ UMainSceneWidget* APCharacter::GetMainSceneWidget() const
 
 void APCharacter::SetMainSceneWidget(UMainSceneWidget* Widget)
 {
-	if(GetLocalRole() < ROLE_Authority)
+	if(GetNetMode() == NM_Standalone || GetNetMode() == NM_Client || GetNetMode() == NM_ListenServer)
 		MainSceneWidget = Widget;
 }
 
@@ -721,6 +723,7 @@ void APCharacter::ReviveCountDown()
 	{
 		bDied = false;
 		GetWorld()->GetTimerManager().ClearTimer(ReviveTimerHandle);
+
 		HealthComp->SetHealth(HealthComp->GetDefaultHealth());
 		OnRevive();
 	}
@@ -811,14 +814,9 @@ void APCharacter::Server_PickupWeapon_Implementation()
 void APCharacter::PickupWeapon_Implementation()
 {
 	if(bDied || !bCanPickup || bIsFiring || bIsReloading || bIsThrowing || GetMovementComponent()->IsFalling())return;
-	if(GetLocalRole() < ROLE_Authority && IsLocallyControlled())
-	{
-		// PCore::PrintOnScreen(GetWorld(), "Pickup", 2.f);
-		if(PickupSound)
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickupSound, GetActorLocation(), GetActorRotation());
-	}
 
-	// if(GetLocalRole() < ROLE_Authority)return;
+	if(PickupSound)
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickupSound, GetActorLocation(), GetActorRotation());
 	
 	// 当前手上没有武器
 	if(!GetCurrentWeapon())

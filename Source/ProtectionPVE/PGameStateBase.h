@@ -20,6 +20,8 @@ class PROTECTIONPVE_API APGameStateBase : public AGameStateBase
 protected:
 	APGameStateBase();
 public:
+	
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PGameState")
 	float MaxTime = 30.0f;
 
@@ -39,22 +41,20 @@ public:
 	
 	virtual void Tick(float DeltaSeconds) override;
 
+	UFUNCTION()
 	void OnGameEnd();
-
-	void SetTimeText(UTextBlock* Text);
-
-	void InitTimeText();
 	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnTotalDeathCountChanged();
+	
+	UFUNCTION()
+	void SetTotalDeathCount(int Value) {TotalDeathCount = Value; OnTotalDeathCountChanged();}
+
+	UFUNCTION()
+	int GetTotalDeathCount() const {return TotalDeathCount;}
 protected:
-	UTextBlock* TimeText;
-
 	int LastIntTime;
-};
 
-inline void APGameStateBase::InitTimeText()
-{
-	if(TimeText)
-	{
-		TimeText->SetText(FText::AsNumber(FMath::FloorToInt(MaxTime)));
-	}
-}
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="PGameState")
+	int TotalDeathCount = 5;
+};

@@ -46,6 +46,5 @@ void APRifle::NativeShoot(FAimHitInfo Info)
 
 void APRifle::SpawnEffect_Implementation(FVector ImpactPoint)
 {
-	if(GetLocalRole() < ROLE_Authority)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefaultImpactEffect, ImpactPoint);
 }
