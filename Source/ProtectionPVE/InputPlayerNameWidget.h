@@ -15,6 +15,7 @@ class PROTECTIONPVE_API UInputPlayerNameWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+protected:
 	UFUNCTION(BlueprintCallable)
 	void OnButtonOKClicked();
 };

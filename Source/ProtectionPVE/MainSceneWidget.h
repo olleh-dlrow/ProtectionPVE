@@ -17,6 +17,22 @@ UCLASS()
 class PROTECTIONPVE_API UMainSceneWidget : public UUserWidget
 {
 	GENERATED_BODY()
+protected:
+	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
+	TSubclassOf<UUserWidget> PauseWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, Category="Ref")
+	APCharacter* Character;
+
+	// 各种控件引用
+	UPROPERTY()
+	TArray<UTextBlock*> RemainBulletTexts = {nullptr, nullptr};
+
+	UPROPERTY()
+	TArray<UTextBlock*> MaxBulletTexts = {nullptr, nullptr};
+
+	UPROPERTY()
+	class UButton* PickupBtn;
 public:
 	// 控件接口
 	void SetRemainBulletText(int Index, const FString& Text);
@@ -24,6 +40,7 @@ public:
 	void SetMaxBulletText(int Index, const FString& Text);
 
 	void SetPickupButtonVisibility(float Visible);
+	
 protected:
 	virtual void NativeOnInitialized() override;
 
@@ -58,20 +75,4 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void OnPickupButtonClicked();
-	
-	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
-	TSubclassOf<UUserWidget> PauseWidgetClass;
-	
-	UPROPERTY(VisibleAnywhere, Category="Ref")
-	APCharacter* Character;
-
-	// 各种控件引用
-	UPROPERTY()
-	TArray<UTextBlock*> RemainBulletTexts = {nullptr, nullptr};
-
-	UPROPERTY()
-	TArray<UTextBlock*> MaxBulletTexts = {nullptr, nullptr};
-
-	UPROPERTY()
-	class UButton* PickupBtn;
 };

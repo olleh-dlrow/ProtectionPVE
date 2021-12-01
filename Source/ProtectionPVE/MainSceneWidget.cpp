@@ -26,19 +26,10 @@ void UMainSceneWidget::NativeOnInitialized()
 void UMainSceneWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	// 初始化外部引用
-	// Character = Cast<APCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	// Character引用MainSceneWidget
-	// Character->SetMainSceneWidget(this);
 	
 	// 获取GameInstance
 	UPGameInstance* GI = Cast<UPGameInstance>(GetGameInstance());
 	check(GI);
-	
-	// 设置玩家名称
-	//UTextBlock* NameText = Cast<UTextBlock>(GetWidgetFromName(TEXT("NameText")));
-	//NameText->SetText(FText::FromString(GI->PlayerName));
 }
 
 void UMainSceneWidget::OnPauseButtonClicked()

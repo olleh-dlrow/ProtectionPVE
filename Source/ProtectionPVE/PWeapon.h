@@ -47,16 +47,25 @@ public:
 	// Sets default values for this actor's properties
 	APWeapon();
 
-	// 只在服务端执行
-	UFUNCTION()
-	void Shoot(FAimHitInfo Info);
-	
-	UFUNCTION()
-	EWeapon GetType() const {return Type;}
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	class UParticleSystem* DefaultImpactEffect;
 
-	UFUNCTION()
-	float GetDamage() const {return Damage;}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	USkeletalMeshComponent* MeshComp;
+
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	FName MagazineSocketName;
 	
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
+	int RemainBulletCount;
+
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	int MaxBulletCount;
+
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	TSubclassOf<UDamageType> DamageTypeClass;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	bool bHasAim;
 
@@ -69,42 +78,31 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName MuzzleSocketName;
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	// 只在服务端执行
-	virtual void NativeShoot(FAimHitInfo Info);
-	
-	bool CheckAimHit(FHitResult& Hit) const;
-
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	EWeapon Type;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	float Damage = 10.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="Weapon")
-	TSubclassOf<UDamageType> DamageTypeClass;
-public:	
+public:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	// 只在服务端执行
+	UFUNCTION()
+	void Shoot(FAimHitInfo Info);
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	class UParticleSystem* DefaultImpactEffect;
+	UFUNCTION()
+	EWeapon GetType() const {return Type;}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	USkeletalMeshComponent* MeshComp;
+	UFUNCTION()
+	float GetDamage() const {return Damage;}
+
+	// 只在服务端执行
+	virtual void NativeShoot(FAimHitInfo Info);
 	
-	// UPROPERTY(EditDefaultsOnly, Category="Components")
-	// USkeletalMeshComponent* MagazineMeshComp;
-
-	UPROPERTY(EditDefaultsOnly, Category="Weapon")
-	FName MagazineSocketName;
-	
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
-	int RemainBulletCount;
-
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
-	int MaxBulletCount;
+	bool CheckAimHit(FHitResult& Hit) const;
 };
 

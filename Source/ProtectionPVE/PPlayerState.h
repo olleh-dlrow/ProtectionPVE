@@ -21,11 +21,11 @@ protected:
 
 	UPROPERTY(Replicated, VisibleAnywhere, Category="PPlayerState")
 	int DeathCount;
-public:
 
-	
+	UPROPERTY()
+	UTextBlock* ScoreText;
+public:
 	// getter / setter
-	
 	UFUNCTION(BlueprintCallable)
 	int GetKillCount() const {return KillCount;}
 
@@ -53,8 +53,5 @@ public:
 	FName GetWeaponAttachSocketName(const FString& WeaponName);
 protected:
 	virtual void BeginPlay() override;
-
-	UPROPERTY()
-	UTextBlock* ScoreText;
 };
 

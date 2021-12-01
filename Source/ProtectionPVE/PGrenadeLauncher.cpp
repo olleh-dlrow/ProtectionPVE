@@ -16,15 +16,10 @@ void APGrenadeLauncher::NativeShoot(FAimHitInfo Info)
 		const FVector SpawnLocation = Info.SpawnLocation;
 	
 		FActorSpawnParameters ActorSpawnParams;
-		// ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 	
 		// spawn the projectile at the muzzle
 		if(BulletClass)
 		{
-			// FString Out = "SpawnBullet\nX: " + FString::SanitizeFloat(SpawnLocation.X)
-			// 			+ " Y: " + FString::SanitizeFloat(SpawnLocation.Y)
-			// 			+ " Z: " + FString::SanitizeFloat(SpawnLocation.Z);
-			// PCore::PrintOnScreen(GetWorld(), Out, 4.f);
 			APBullet* Bullet = GetWorld()->SpawnActor<APBullet>(BulletClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 			if(Bullet)
 			{

@@ -14,7 +14,7 @@
 
 APGameStateBase::APGameStateBase()
 {
-	PrimaryActorTick.bCanEverTick = true;
+
 }
 
 void APGameStateBase::BeginPlay()
@@ -23,12 +23,6 @@ void APGameStateBase::BeginPlay()
 
 	RemainTime = MaxTime;
 	LastIntTime = FMath::FloorToInt(RemainTime);
-}
-
-void APGameStateBase::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-	
 }
 
 void APGameStateBase::OnGameEnd()

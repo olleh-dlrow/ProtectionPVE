@@ -26,7 +26,8 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
 	TSubclassOf<UUserWidget> QuitGameWidgetClass;
-	
+
+protected:
 	UFUNCTION(BlueprintCallable)
 	void OnStartButtonClicked();
 

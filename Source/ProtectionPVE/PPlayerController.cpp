@@ -60,31 +60,7 @@ void APPlayerController::BeginPlay()
 void APPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	
-	if(!bPossessed && GetPawn())
-	{
-		// PCore::PrintOnScreen(this, "GetPawnSuccess", 2.f);
-		bPossessed = true;
-		APCharacter* MyCharacter = GetPawn<APCharacter>();
-		if(MyCharacter)
-		{
-			// // 开局默认创建1把武器
-			// MyCharacter->CreateWeapon(0, MyCharacter->RifleWeaponClass, MyCharacter->RifleAttachSocketName);
-			// MyCharacter->SetMaxBulletCount(0, MyCharacter->GetMaxBulletCount(0));
-			// MyCharacter->SetRemainBulletCount(0, MyCharacter->GetMaxBulletCount(0));
-			//
-			// // 第2把武器
-			// MyCharacter->CreateWeapon(1, MyCharacter->GrenadeLauncherClass, MyCharacter->GrenadeLauncherSocketName);
-			// MyCharacter->SetMaxBulletCount(1, MyCharacter->GetMaxBulletCount(1));
-			// MyCharacter->SetRemainBulletCount(1, MyCharacter->GetMaxBulletCount(1));
-		}
-	}
+
 }
 
-void APPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-	// Here we list the variables we want to replicate + a condition if wanted
-	DOREPLIFETIME(APPlayerController, bPossessed);
-}
 

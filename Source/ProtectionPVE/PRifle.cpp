@@ -4,7 +4,6 @@
 #include "PRifle.h"
 
 
-#include "PCore.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -35,7 +34,6 @@ void APRifle::NativeShoot(FAimHitInfo Info)
 					GetOwner(),
 					DamageTypeClass);
 			}
-			// PCore::PrintOnScreen(GetWorld(), Hit.GetActor()->GetName() + FString(" Take Damage"), 2.f);
 
 			
 			if(DefaultImpactEffect)

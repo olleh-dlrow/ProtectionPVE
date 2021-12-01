@@ -25,39 +25,98 @@ public:
 	// Sets default values for this character's properties
 	APCharacter();
 
+public:
+	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	float BaseTurnRate;
+
+	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	float BaseLookUpRate;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PCharacter")
+	float MaxWalkSpeed = 600.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PCharacter")
+	float MaxSprintSpeed = 1200.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
+	float MaxCrouchSpeed = 300.0f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PCharacter")
+	float Acceleration = 20.0f;
+
+	// 投掷速度
+	UPROPERTY(EditAnywhere, Category="PCharacter")
+	FVector MaxThrowVelocity = FVector(1000.0f, 1000.0f, 0.0f);
+	
+	// 用于控制free view模式下的Yaw角
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="PCharacter")
+	float CurrentYaw;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
+	float YawRotateSpeed = 2.0f;
+	
+	// 是否能够冲刺？
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PCharacter")
+	bool bCanSprint = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PCharacter")
+	bool bPlayInPC = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "PCharacter")
+	TSubclassOf<APWeapon> RifleWeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
+	TSubclassOf<APWeapon> GrenadeLauncherClass;
+	
+	// weapon 
+	UPROPERTY(EditDefaultsOnly, Category = "PCharacter")
+	FName RifleAttachSocketName = "RifleSocket";
+
+	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
+	FName GrenadeLauncherSocketName = "GrenadeLauncherSocket";
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
+	USoundBase* ExplosionSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
+	USoundBase* PickupSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
+	USoundBase* ReloadSound;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, Category="PCharacter")
+	APWeapon* DesiredPickupWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="PCharacter")
+	FTimerHandle ReviveTimerHandle;
+	
+	// 人物当前状态
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
+	bool bInFreeView;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
+	bool bCanPickup;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
+	bool bDied;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="State")
+	bool bIsFiring;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="State")
+	bool bIsThrowing;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="State")
+	bool bIsReloading;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
+	float HandIKWeight;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
+	float ShootWeight;
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	UFUNCTION(BlueprintCallable)
-	void OnDestroy();
-	
-	void MoveForward(float Value);
-
-	void MoveRight(float Value);
-
-	void TurnBody(float Value);
-	
-	void LookUp(float Value);
-	
-	void TurnAtRate(float Rate);
-
-	void LookUpAtRate(float Rate);
-
-	void DoTouchPressed(ETouchIndex::Type FingerIndex, FVector Location);
-
-	void DoTouchRepeat(ETouchIndex::Type FingerIndex, FVector Location);
-
-	UFUNCTION(BlueprintCallable)
-	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupt);
-	
-	bool CheckAimHit(FHitResult& Hit);
-
-	// 计算发射轨迹线的射线
-	void CalculateTraceEnds(FVector& TraceFrom, FVector& TraceTo);
-	
-	bool CheckWeaponIndex(int Index) const;
-
 	UPROPERTY()
 	FAimHitInfo AimHitInfo;
 	
@@ -122,8 +181,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
 	int DefaultReviveTime = 5;
-public:	
-	// Called every frame
+	
+	UPROPERTY(Replicated)
+	float DesiredMaxSpeed;
+public:
+		// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
@@ -268,103 +330,42 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void OnRevive();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void OnDestroy();
 	
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseTurnRate;
+	void MoveForward(float Value);
 
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseLookUpRate;
+	void MoveRight(float Value);
+
+	void TurnBody(float Value);
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PCharacter")
-	float MaxWalkSpeed = 600.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PCharacter")
-	float MaxSprintSpeed = 1200.0f;
-
-	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
-	float MaxCrouchSpeed = 300.0f;
+	void LookUp(float Value);
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PCharacter")
-	float Acceleration = 20.0f;
+	void TurnAtRate(float Rate);
 
-	// 投掷速度
-	UPROPERTY(EditAnywhere, Category="PCharacter")
-	FVector MaxThrowVelocity = FVector(1000.0f, 1000.0f, 0.0f);
+	void LookUpAtRate(float Rate);
+
+	void DoTouchPressed(ETouchIndex::Type FingerIndex, FVector Location);
+
+	void DoTouchRepeat(ETouchIndex::Type FingerIndex, FVector Location);
+
+	UFUNCTION(BlueprintCallable)
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupt);
 	
-	// 用于控制free view模式下的Yaw角
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="PCharacter")
-	float CurrentYaw;
+	bool CheckAimHit(FHitResult& Hit);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
-	float YawRotateSpeed = 2.0f;
+	// 计算发射轨迹线的射线
+	void CalculateTraceEnds(FVector& TraceFrom, FVector& TraceTo);
 	
-	// 是否能够冲刺？
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PCharacter")
-	bool bCanSprint = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PCharacter")
-	bool bPlayInPC = false;
-
-	UPROPERTY(EditDefaultsOnly, Category = "PCharacter")
-	TSubclassOf<APWeapon> RifleWeaponClass;
-
-	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
-	TSubclassOf<APWeapon> GrenadeLauncherClass;
+	bool CheckWeaponIndex(int Index) const;
 	
-	// weapon 
-	UPROPERTY(EditDefaultsOnly, Category = "PCharacter")
-	FName RifleAttachSocketName = "RifleSocket";
-
-	UPROPERTY(EditDefaultsOnly, Category="PCharacter")
-	FName GrenadeLauncherSocketName = "GrenadeLauncherSocket";
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
-	USoundBase* ExplosionSound;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
-	USoundBase* PickupSound;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCharacter")
-	USoundBase* ReloadSound;
-	
-	UPROPERTY(Replicated, VisibleAnywhere, Category="PCharacter")
-	APWeapon* DesiredPickupWeapon;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="PCharacter")
-	FTimerHandle ReviveTimerHandle;
-	
-	// 人物当前状态
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="State")
-	bool bInFreeView;
-
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
-	bool bCanPickup;
-	
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
-	bool bDied;
-	
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="State")
-	bool bIsFiring;
-
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="State")
-	bool bIsThrowing;
-
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="State")
-	bool bIsReloading;
-
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
-	float HandIKWeight;
-
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="State")
-	float ShootWeight;
-private:
 	UFUNCTION()
 	void SprintTick();
-
-	UPROPERTY(Replicated)
-	float DesiredMaxSpeed;
 };
 
 

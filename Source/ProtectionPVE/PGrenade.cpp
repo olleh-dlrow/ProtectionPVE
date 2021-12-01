@@ -8,9 +8,6 @@
 // Sets default values
 APGrenade::APGrenade()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	
@@ -28,11 +25,4 @@ void APGrenade::BeginPlay()
 	
 }
 
-// Called every frame
-void APGrenade::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-
-}
 

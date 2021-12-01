@@ -14,10 +14,7 @@ UCLASS()
 class PROTECTIONPVE_API APPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-protected:
-	UPROPERTY(Replicated)
-	bool bPossessed = false;
-	
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="WidgetClass")
 	TSubclassOf<UUserWidget> MainSceneWidgetClass;
@@ -25,6 +22,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="TouchInterface")
 	UTouchInterface* TouchInterface;
 
+public:
 	virtual void OnPossess(APawn* InPawn) override;
 protected:
 	// 客户端的Simulate不会执行

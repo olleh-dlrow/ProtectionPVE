@@ -16,15 +16,7 @@ public:
 	// Sets default values for this actor's properties
 	APGrenade();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="PGrenade")
 	float Damage = 40.f;
 
@@ -36,4 +28,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PGrenade")
 	UCapsuleComponent* CapsuleComp;
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 };

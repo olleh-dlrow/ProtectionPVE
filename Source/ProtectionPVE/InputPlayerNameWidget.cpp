@@ -12,7 +12,7 @@ void UInputPlayerNameWidget::OnButtonOKClicked()
 	UPGameInstance* GI = Cast<UPGameInstance>(GetGameInstance());
 	if(GI)
 	{
-		UEditableTextBox* NameETB = Cast<UEditableTextBox>(GetWidgetFromName(TEXT("NameETB")));
+		const UEditableTextBox* NameETB = Cast<UEditableTextBox>(GetWidgetFromName(TEXT("NameETB")));
 		GI->PlayerName = NameETB->GetText().ToString();
 	}
 	RemoveFromParent();

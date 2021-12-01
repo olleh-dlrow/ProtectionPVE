@@ -17,11 +17,10 @@ UCLASS()
 class PROTECTIONPVE_API APGameStateBase : public AGameStateBase
 {
 	GENERATED_BODY()
-protected:
-	APGameStateBase();
 public:
+	APGameStateBase();
 	
-	
+public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PGameState")
 	float MaxTime = 30.0f;
 
@@ -36,10 +35,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="PGameState")
 	TSubclassOf<UUserWidget> RankWidgetClass;
+
+protected:
+	int LastIntTime;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="PGameState")
+	int TotalDeathCount = 5;
 	
+public:
 	virtual void BeginPlay() override;
-	
-	virtual void Tick(float DeltaSeconds) override;
 
 	UFUNCTION()
 	void OnGameEnd();
@@ -52,9 +56,4 @@ public:
 
 	UFUNCTION()
 	int GetTotalDeathCount() const {return TotalDeathCount;}
-protected:
-	int LastIntTime;
-
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category="PGameState")
-	int TotalDeathCount = 5;
 };

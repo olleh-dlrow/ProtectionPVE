@@ -12,12 +12,7 @@
 // Sets default values
 APBullet::APBullet()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-	// MeshComp->OnComponentHit.AddDynamic(this, &APBullet::OnHit);
-	// MeshComp->OnComponentBeginOverlap.AddDynamic(this, &APBullet::OnBeginOverlap);
 
 	RootComponent = MeshComp;
 
@@ -29,7 +24,7 @@ APBullet::APBullet()
 	ProjectileMovement->bRotationFollowsVelocity = false;
 	ProjectileMovement->bShouldBounce = false;
 	
-	// InitialLifeSpan = 3.0f;
+	InitialLifeSpan = 3.0f;
 
 	SetReplicates(true);
 }
@@ -63,10 +58,8 @@ inline void APBullet::Destroyed()
 void APBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	// PCore::PrintOnScreen(GetWorld(), "On Hit", 2.f);
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		// PCore::PrintOnScreen(GetWorld(), FString("On Hit ") + OtherActor->GetName(), 2.f);
 		SpawnEffect();
 		Destroy();
 	}
@@ -81,7 +74,6 @@ void APBullet::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		// PCore::PrintOnScreen(GetWorld(),  FString("On Overlap ") + OtherActor->GetName(), 2.f);
 		SpawnEffect();
 		Destroy();
 	}
@@ -90,14 +82,7 @@ void APBullet::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 void APBullet::SpawnEffect_Implementation()
 {
 	
-		// PCore::PrintOnScreen(GetWorld(), "Effect Spawned", 3.f);
-		if(ImpactEffect)UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, GetActorLocation());
-		if(ImpactSound) UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ImpactSound, GetActorLocation());
-}
-
-// Called every frame
-void APBullet::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+	if(ImpactEffect)UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, GetActorLocation());
+	if(ImpactSound) UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ImpactSound, GetActorLocation());
 }
 

@@ -19,7 +19,8 @@ class PROTECTIONPVE_API UPauseGameWidget : public UUserWidget
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="WidgetClass")
 	TSubclassOf<UInGameSettingsWidget> SettingsWC;
-	
+
+protected:
 	UFUNCTION(BlueprintCallable)
 	void OnResumeButtonClicked();
 

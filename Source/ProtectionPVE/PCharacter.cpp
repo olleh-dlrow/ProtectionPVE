@@ -126,14 +126,6 @@ void APCharacter::DoTouchRepeat(ETouchIndex::Type FingerIndex, FVector Location)
 void APCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// if(Weapons[0])
-	// {
-	// 	bool V = Weapons[0]->MeshComp->IsVisible();
-	// 	PCore::PrintOnScreen(this, V ? "visible" : "not visible", 0.f);		
-	// }
-
-	// PCore::PrintOnScreen(this, FString::SanitizeFloat(RemoteViewPitch * 360.f / 255.f), 0.f);
 	
 	if(bCanSprint)
 	{
@@ -303,7 +295,6 @@ bool APCharacter::CheckAimHit(FHitResult& Hit)
 		
 		if(GetWorld()->LineTraceSingleByChannel(Hit, CameraLocation, CameraLocation + WorldDirection, ECC_Pawn, QueryParams))
 		{
-			// PCore::PrintOnScreen(GetWorld(), Hit.Actor->GetName(), 2.f);
 			return true;
 		}
 	}
@@ -352,11 +343,9 @@ void APCharacter::Throw_Implementation()
 	
 	if(!AI->Montage_IsPlaying(ThrowMontage))
 	{
-		// PCore::PrintOnScreen(this, "ThrowMontage", 2.f);
 		PlayAnimMontage(ThrowMontage);
 		if(GetCurrentWeapon())
 		{
-			// PCore::PrintOnScreen(this, "Can not see", 3.f);
 			GetCurrentWeapon()->bCanSee = false;
 		}
 	}
@@ -395,12 +384,6 @@ void APCharacter::Server_Reload_Implementation()
 void APCharacter::OnDied_Implementation()
 {
 	bUseControllerRotationYaw = false;
-
-	// auto AI = GetMesh()->GetAnimInstance();
-	//
-	// if(GetLocalRole() < ROLE_Authority && AI && DeathMontage)
-	// 	AI->Montage_Play(DeathMontage);
-	
 }
 
 void APCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -416,7 +399,6 @@ void APCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 			GetMainSceneWidget()->SetPickupButtonVisibility(true);
 
 		DesiredPickupWeapon = Weapon;
-		// PCore::PrintOnScreen(GetWorld(), DesiredPickupWeapon->GetName(), 2.f);
 
 		bCanPickup = true;
 	}
@@ -439,7 +421,6 @@ void APCharacter::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 
 void APCharacter::NotifyThrowOut()
 {
-	// PCore::PrintOnScreen(this, "ThrowOut", 2.f);
 	if(GetLocalRole() == ROLE_Authority)
 	{
 		if(!Grenade)return;
@@ -483,9 +464,6 @@ void APCharacter::NotifyThrowOut()
 			
 			Grenade->CapsuleComp->SetPhysicsLinearVelocity(FVector(V.X, V.Y, Vy));
 		}
-		// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue,  "DeltaY " + FString::SanitizeFloat(DeltaY));
-		// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue,  "DeltaX " + FString::SanitizeFloat(DeltaX));
-		// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, "Vy1 " + FString::SanitizeFloat(Vy1));			
 	}
 }
 
@@ -533,7 +511,6 @@ int APCharacter::GetRemainBulletCount(int Index) const
 		return Weapon->RemainBulletCount;
 	}
 	
-	// UE_LOG(LogActor, Warning, TEXT("Weapon is null"))
 	return 0;
 }
 
@@ -542,7 +519,6 @@ int APCharacter::GetMaxBulletCount(int Index) const
 	APWeapon* Weapon = GetWeapon(Index);
 	if(Weapon)return Weapon->MaxBulletCount;
 	
-	// UE_LOG(LogActor, Warning, TEXT("Weapon is null"))
 	return 0;
 }
 
@@ -624,7 +600,6 @@ void APCharacter::SetCurrentWeaponInSlot(int Slot)
 	if(Slot >= 0 && Slot < Weapons.Num())
 	{
 		CurrentWeaponIndex = Slot;
-		// PCore::PrintOnScreen(GetWorld(), FString::FromInt(CurrentWeaponIndex), 2.f);
 	}
 	else
 		UE_LOG(LogActor, Warning, TEXT("SetCurrentWeapon index out of range"))
@@ -671,8 +646,6 @@ FName APCharacter::GetWeaponAttachSocketName(EWeapon Type)
 
 void APCharacter::CreateWeapon(int Slot, TSubclassOf<APWeapon> WeaponClass, FName SocketName)
 {
-	// PCore::PrintOnScreen(this, "Create Weapon", 2.f);
-	
 	if(!CheckWeaponIndex(Slot))
 	{
 		UE_LOG(LogActor, Warning, TEXT("CreateWeapon index out of range"))
@@ -736,7 +709,6 @@ void APCharacter::OnRevive_Implementation()
 
 void APCharacter::Reload_Implementation()
 {
-	// PCore::PrintOnScreen(this, "Reload", 2.f);
 	bool bIsInAir = GetMovementComponent()->IsFalling();
 	if(bDied || !GetCurrentWeapon() || bIsFiring || bIsInAir)return;
 	if(GetCurrentMaxBulletCount() <= 0)return;
@@ -759,18 +731,15 @@ void APCharacter::Reload_Implementation()
 
 void APCharacter::Server_SwitchWeapon_Implementation(int Slot)
 {
-	// PCore::PrintOnScreen(this, "Multicast", 3.f);
 	SwitchWeapon(Slot);
 }
 
 void APCharacter::SwitchWeapon_Implementation(int Slot)
 {
-	// PCore::PrintOnScreen(this, "Switch Weapon", 3.f);
 	if(bDied || bIsFiring || bIsReloading || bIsThrowing || GetMovementComponent()->IsFalling())return;
 	// 没有武器
 	if(!GetWeapon(Slot))
 	{
-		// PCore::PrintOnScreen(this, "No Weapon", 3.f);
 		return;
 	}
 
@@ -778,7 +747,6 @@ void APCharacter::SwitchWeapon_Implementation(int Slot)
 	// 该武器为当前武器，收回
 	if(GetWeapon(Slot) == GetCurrentWeapon())
 	{
-		// PCore::PrintOnScreen(this, "Current Weapon", 3.f);
 		ShootWeight = 0;
 		GetCurrentWeapon()->bCanSee = false;
 		PutBackCurrentWeapon();
@@ -786,11 +754,9 @@ void APCharacter::SwitchWeapon_Implementation(int Slot)
 	// 该武器不是当前武器
 	else
 	{
-		// UE_LOG(LogTemp, Display, TEXT("Not Current Weapon"))
 		// 没持有武器，则装备该武器
 		if(!GetCurrentWeapon())
 		{
-			// PCore::PrintOnScreen(this, "Not Equip This Weapon", 3.f);
 			SetCurrentWeaponInSlot(Slot);
 			GetCurrentWeapon()->bCanSee = true;
 			ShootWeight = 1;
@@ -798,7 +764,6 @@ void APCharacter::SwitchWeapon_Implementation(int Slot)
 		// 持有武器，则换下当前武器再装备该武器
 		else
 		{
-			// PCore::PrintOnScreen(this, "Equipped Other Weapon", 3.f);
 			GetCurrentWeapon()->bCanSee = false;
 			SetCurrentWeaponInSlot(Slot);
 			GetCurrentWeapon()->bCanSee = true;
